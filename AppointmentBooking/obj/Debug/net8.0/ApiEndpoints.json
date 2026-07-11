@@ -1,0 +1,239 @@
+[
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetAll",
+    "RelativePath": "api/AppointmentBooking",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetById",
+    "RelativePath": "api/AppointmentBooking/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "DeleteAppointment",
+    "RelativePath": "api/AppointmentBooking/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "CreateAppointment",
+    "RelativePath": "api/AppointmentBooking/CreateAppointment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "AppointmentBooking.Models.Appointment",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "CreateAQuery",
+    "RelativePath": "api/AppointmentBooking/CreateAQuery",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "AppointmentBooking.Models.CustomerQuery",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "CreateDentist",
+    "RelativePath": "api/AppointmentBooking/CreateDentist",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "AppointmentBooking.Models.Doctor",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "DentistLogin",
+    "RelativePath": "api/AppointmentBooking/DentistLogin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "AppointmentBooking.Controllers.LoginRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetAllDoctors",
+    "RelativePath": "api/AppointmentBooking/GetAllDoctors",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetAllDoctorsForProcedure",
+    "RelativePath": "api/AppointmentBooking/GetAllDoctorsForProcedure/{procedureID}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "procedureID",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetAllProcedures",
+    "RelativePath": "api/AppointmentBooking/GetAllProcedures",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetAvailableSlots",
+    "RelativePath": "api/AppointmentBooking/GetAvailableSlots",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "firstname",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "lastname",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "date",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetContactInformation",
+    "RelativePath": "api/AppointmentBooking/GetContactInformation/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetDoctorFreeTimes",
+    "RelativePath": "api/AppointmentBooking/GetDoctorFreeTimes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "doctorID",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "date",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "GetDoctorQueries",
+    "RelativePath": "api/AppointmentBooking/GetDoctorQueries/{doctorID}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "doctorID",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AppointmentBooking.Controllers.AppointmentBookingController",
+    "Method": "RegisterCustomer",
+    "RelativePath": "api/AppointmentBooking/RegisterCusomter",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "AppointmentBooking.Models.Customer",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

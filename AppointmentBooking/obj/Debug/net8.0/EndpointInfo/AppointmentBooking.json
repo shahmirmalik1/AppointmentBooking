@@ -1,0 +1,562 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "AppointmentBooking",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/AppointmentBooking": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/DentistLogin": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetAvailableSlots": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "firstname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastname",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/CreateDentist": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Doctor"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Doctor"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Doctor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/RegisterCusomter": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/CreateAppointment": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Appointment"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Appointment"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Appointment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/{id}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetAllDoctors": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetContactInformation/{id}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetAllProcedures": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetAllDoctorsForProcedure/{procedureID}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "procedureID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/CreateAQuery": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerQuery"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerQuery"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetDoctorQueries/{doctorID}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "doctorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetDoctorFreeTimes": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "doctorID",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Appointment": {
+        "required": [
+          "confirmed",
+          "customer_ID",
+          "dentist_ID",
+          "duration_mins",
+          "start_Time"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customer_ID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dentist_ID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "start_Time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_mins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Customer": {
+        "required": [
+          "email_Address",
+          "first_Name",
+          "last_Name",
+          "phone_Number"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "last_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "phone_Number": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email_Address": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerQuery": {
+        "required": [
+          "confirmed",
+          "email_Address",
+          "first_Name",
+          "phone_Number",
+          "surname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "surname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email_Address": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "phone_Number": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "procedure_ID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "doctor_ID": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "date_Time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "additional_Information": {
+            "type": "string",
+            "nullable": true
+          },
+          "confirmed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Doctor": {
+        "required": [
+          "email_Address",
+          "first_Name",
+          "last_Name",
+          "phone_Number"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "last_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "phone_Number": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email_Address": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passwordHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email_Address": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "debugHash": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
