@@ -14,6 +14,9 @@ namespace AppointmentBooking.Models
 
         [Required]
         public string Surname { get; set; }
+        
+        [Required]
+        public DateOnly Date_Of_Birth {get;set;} = DateOnly.FromDateTime(DateTime.MinValue);
 
         [Required]
         public string Email_Address { get; set; }
@@ -29,8 +32,6 @@ namespace AppointmentBooking.Models
         public string? Additional_Information { get; set; }
 
         [Required]
-        public bool Confirmed { get; set; }
-
-
+        public string Status { get; set; } = "Pending";
     }
 }

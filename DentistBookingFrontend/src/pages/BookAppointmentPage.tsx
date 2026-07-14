@@ -1,10 +1,17 @@
 ﻿import { useState, useEffect } from "react";
 import { GetAllDoctors, GetAllProcedures, GetAllDoctorsForProcedure, CreateAQuery, GetDoctorFreeTimes } from "../services/APIService";
 
+const getTodayLocalDate = () => {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
+};
+
 function BookAppointmentPage() {
   const [form, setForm] = useState({
     firstName: "",
     surname: "",
+    dateOfBirth: "",
     email: "",
     phone: "",
     procedureid: "",
@@ -13,13 +20,11 @@ function BookAppointmentPage() {
     additionalInfo: "",
   });
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().slice(0, 10)
+    getTodayLocalDate()
   );
   const [procedures, setProcedures] = useState<any[]>([]);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState("");
 
   const selectedSlotDate = form.time
     ? new Date(`${selectedDate}T${form.time}`)
@@ -95,6 +100,7 @@ function BookAppointmentPage() {
     if (
       !form.firstName ||
       !form.surname ||
+      !form.dateOfBirth ||
       !form.email ||
       !form.phone ||
       !form.procedureid ||
@@ -107,16 +113,17 @@ function BookAppointmentPage() {
     // Submit immediately (summary is always visible)
 
     try {
-      const appointmentDateTime = new Date(`${selectedDate}T${form.time}`);
+      const appointmentDateTime = `${selectedDate}T${form.time}:00`;
 
       const query = {
         First_Name: form.firstName,
         Surname: form.surname,
+        Date_Of_Birth: form.dateOfBirth,
         Email_Address: form.email,
         Phone_Number: form.phone,
         Procedure_ID: Number(form.procedureid),
         Doctor_ID: Number(form.doctorid),
-        Date_Time: appointmentDateTime.toISOString(),
+        Date_Time: appointmentDateTime,
         Additional_Information: form.additionalInfo,
       };
 
@@ -126,6 +133,7 @@ function BookAppointmentPage() {
       setForm({
         firstName: "",
         surname: "",
+        dateOfBirth: "",
         email: "",
         phone: "",
         procedureid: "",
@@ -185,6 +193,16 @@ function BookAppointmentPage() {
         />
 
         <input
+          name="dateOfBirth"
+          type="date"
+          placeholder="Date of Birth"
+          value={form.dateOfBirth}
+          onChange={handleChange}
+          className="form-input"
+          max={getTodayLocalDate()}
+        />
+
+        <input
           name="email"
           placeholder="Email"
           value={form.email}
@@ -240,7 +258,7 @@ function BookAppointmentPage() {
             id="appointment-date"
             type="date"
             value={selectedDate}
-            min={new Date().toISOString().slice(0, 10)}
+            min={getTodayLocalDate()}
             onChange={(e) => {
               setSelectedDate(e.target.value);
               setForm({ ...form, time: "" });
@@ -321,6 +339,7 @@ function BookAppointmentPage() {
           <p><strong>Doctor:</strong> {selectedDoctor ? `${selectedDoctor.first_Name} ${selectedDoctor.last_Name}` : "-"}</p>
           <p><strong>Date & Time:</strong> {selectedSlotDate ? selectedSlotDate.toLocaleString() : "-"}</p>
           <p><strong>Patient:</strong> {form.firstName} {form.surname}</p>
+          <p><strong>Date of birth:</strong> {form.dateOfBirth || "-"}</p>
           <p className="form-note">The summary updates as you change selections.</p>
         </div>
 

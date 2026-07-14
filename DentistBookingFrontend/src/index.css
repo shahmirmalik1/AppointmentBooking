@@ -425,6 +425,96 @@ select:focus {
   flex-wrap: wrap;
 }
 
+.dashboard-actions {
+  margin-top: 14px;
+}
+
+.query-filters {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr;
+  gap: 12px;
+}
+
+.calendar-view {
+  display: grid;
+  gap: 16px;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calendar-toolbar h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.calendar-cell {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #ffffff;
+  min-height: 140px;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.calendar-cell.empty {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+.calendar-date {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.calendar-appointments {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-appointment-item {
+  display: grid;
+  gap: 2px;
+  background: #eef2ff;
+  border: 1px solid #dbe2ff;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.calendar-appointment-item strong {
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.calendar-appointment-item span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.calendar-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .tab-button {
   appearance: none;
   background: var(--surface);
@@ -537,6 +627,11 @@ select:focus {
   color: #92400e;
 }
 
+.badge.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .profile-form {
   display: grid;
   gap: 20px;
@@ -556,11 +651,35 @@ select:focus {
   .profile-grid {
     grid-template-columns: 1fr;
   }
+
+  .query-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-grid {
+    gap: 8px;
+  }
+
+  .calendar-cell {
+    min-height: 120px;
+  }
 }
 
 @media (max-width: 640px) {
   .slot-section-header {
     align-items: flex-start;
+  }
+
+  .calendar-grid.weekdays {
+    display: none;
+  }
+
+  .calendar-grid.days {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-cell.empty {
+    display: none;
   }
 }
 

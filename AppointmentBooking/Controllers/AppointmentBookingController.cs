@@ -271,11 +271,11 @@ namespace AppointmentBooking.Controllers
 
             var appt = new Appointment
             {
-                Customer_ID = dto.Customer_ID,
+                Customer_Full_Name = dto.Customer_Full_Name,
+                Customer_Date_Of_Birth = dto.Customer_Date_Of_Birth,
                 Dentist_ID = dto.Dentist_ID,
-                Start_Time = dto.Start_Time.ToUniversalTime(),
-                Duration_mins = dto.Duration_mins,
-                Confirmed = true
+                Start_Time = dto.Start_Time,
+                Duration_mins = dto.Duration_mins
             };
 
             _db.Appointments.Add(appt);
@@ -355,13 +355,14 @@ namespace AppointmentBooking.Controllers
             {
                 First_Name = dto.First_Name,
                 Surname = dto.Surname,
+                Date_Of_Birth = dto.Date_Of_Birth,
                 Email_Address = dto.Email_Address,
                 Phone_Number = dto.Phone_Number,
                 Procedure_ID = dto.Procedure_ID,
                 Doctor_ID = dto.Doctor_ID,
                 Date_Time = dto.Date_Time,
                 Additional_Information = dto.Additional_Information,
-                Confirmed = false
+                Status = string.IsNullOrWhiteSpace(dto.Status) ? "Pending" : dto.Status,
             };
 
             _db.CustomerQueries.Add(appt);
@@ -371,10 +372,14 @@ namespace AppointmentBooking.Controllers
         }
 
         [HttpGet("GetDoctorQueries/{doctorID:int}")]
-        public async Task<IActionResult> GetDoctorQueries(int doctorID)
+        public async Task<IActionResult> GetDoctorQueries(int doctorID, [FromQuery] bool includeResolved = false)
         {
             var queries = await (from q in _db.CustomerQueries
                                  where q.Doctor_ID == doctorID
+                                    && (includeResolved
+                                        || q.Status == null
+                                        || (q.Status != "Accepted"
+                                            && q.Status != "Rejected"))
                                  join p in _db.Procedures on q.Procedure_ID equals p.ID into procedures
                                  from proc in procedures.DefaultIfEmpty()
                                  orderby q.Date_Time descending
@@ -383,6 +388,7 @@ namespace AppointmentBooking.Controllers
                                      ID = q.ID,
                                      First_Name = q.First_Name,
                                      Surname = q.Surname,
+                                     Date_Of_Birth = q.Date_Of_Birth,
                                      Email_Address = q.Email_Address,
                                      Phone_Number = q.Phone_Number,
                                      Procedure_ID = q.Procedure_ID,
@@ -390,10 +396,21 @@ namespace AppointmentBooking.Controllers
                                      Doctor_ID = q.Doctor_ID,
                                      Date_Time = q.Date_Time,
                                      Additional_Information = q.Additional_Information,
-                                     Confirmed = q.Confirmed
+                                     Status = q.Status,
                                  }).ToListAsync();
 
             return Ok(queries);
+        }
+
+        [HttpGet("GetDoctorAppointments/{doctorID:int}")]
+        public async Task<IActionResult> GetDoctorAppointments(int doctorID)
+        {
+            var appointments = await _db.Appointments
+                .Where(a => a.Dentist_ID == doctorID)
+                .OrderBy(a => a.Start_Time)
+                .ToListAsync();
+
+            return Ok(appointments);
         }
 
         [HttpPut("ConfirmDoctorQuery/{queryID:int}")]
@@ -402,20 +419,71 @@ namespace AppointmentBooking.Controllers
             var query = await _db.CustomerQueries.FindAsync(queryID);
             if (query == null) return NotFound();
 
-            query.Confirmed = true;
+            if (string.Equals(query.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict("Rejected queries cannot be accepted.");
+            }
+
+            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict("This query is already accepted.");
+            }
+
+            if (!query.Doctor_ID.HasValue || !query.Date_Time.HasValue)
+            {
+                return BadRequest("Doctor and appointment time are required to accept a query.");
+            }
+
+            var procedureDuration = 30;
+            if (query.Procedure_ID.HasValue)
+            {
+                var procedure = await _db.Procedures.FindAsync(query.Procedure_ID.Value);
+                if (procedure != null && procedure.Procedure_Duration_mins > 0)
+                {
+                    procedureDuration = procedure.Procedure_Duration_mins;
+                }
+            }
+
+            var startTime = query.Date_Time.Value;
+            var hasConflict = await _db.Appointments.AnyAsync(a =>
+                a.Dentist_ID == query.Doctor_ID.Value &&
+                a.Start_Time < startTime.AddMinutes(procedureDuration) &&
+                a.Start_Time.AddMinutes(a.Duration_mins) > startTime);
+
+            if (hasConflict)
+            {
+                return Conflict("Selected slot is already taken.");
+            }
+
+            var appointment = new Appointment
+            {
+                Dentist_ID = query.Doctor_ID.Value,
+                Start_Time = startTime,
+                Duration_mins = procedureDuration,
+                Customer_Full_Name = $"{query.First_Name} {query.Surname}".Trim(),
+                Customer_Date_Of_Birth = query.Date_Of_Birth,
+            };
+
+            _db.Appointments.Add(appointment);
+            query.Status = "Accepted";
             await _db.SaveChangesAsync();
-            return Ok();
+            return Ok(appointment);
         }
 
-        [HttpDelete("RejectDoctorQuery/{queryID:int}")]
+        [HttpPut("RejectDoctorQuery/{queryID:int}")]
         public async Task<IActionResult> RejectDoctorQuery(int queryID)
         {
             var query = await _db.CustomerQueries.FindAsync(queryID);
             if (query == null) return NotFound();
 
-            _db.CustomerQueries.Remove(query);
+            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict("Accepted queries cannot be rejected.");
+            }
+
+            query.Status = "Rejected";
             await _db.SaveChangesAsync();
-            return NoContent();
+            return Ok();
         }
 
         [HttpGet("GetDoctorFreeTimes")]
@@ -490,6 +558,7 @@ namespace AppointmentBooking.Controllers
         public int ID { get; set; }
         public string First_Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
+        public DateOnly Date_Of_Birth {get; set;} = DateOnly.FromDateTime(DateTime.MinValue);
         public string Email_Address { get; set; } = string.Empty;
         public string Phone_Number { get; set; } = string.Empty;
         public int? Procedure_ID { get; set; }
@@ -497,6 +566,6 @@ namespace AppointmentBooking.Controllers
         public int? Doctor_ID { get; set; }
         public DateTime? Date_Time { get; set; }
         public string? Additional_Information { get; set; }
-        public bool Confirmed { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

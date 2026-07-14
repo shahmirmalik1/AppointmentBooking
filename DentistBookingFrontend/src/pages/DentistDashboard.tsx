@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   GetDoctorQueries,
+  GetDoctorAppointments,
   GetDentistProfile,
   UpdateDentistProfile,
   ConfirmDoctorQuery,
@@ -8,10 +10,13 @@ import {
 } from "../services/APIService";
 
 function DentistDashboard() {
+  const navigate = useNavigate();
   const [dentist, setDentist] = useState<{ ID: number; First_Name: string; Last_Name: string } | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [queries, setQueries] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("queries");
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [statusMessage, setStatusMessage] = useState("");
   const [loadingQueryId, setLoadingQueryId] = useState<number | null>(null);
   const [rejectQueryId, setRejectQueryId] = useState<number | null>(null);
@@ -36,6 +41,18 @@ function DentistDashboard() {
     Role: saved.Role ?? saved.role ?? "",
   });
 
+  const isPendingStatus = (status: string | null | undefined) => {
+    const normalized = (status ?? "Pending").toString().trim().toLowerCase();
+    return normalized !== "accepted" && normalized !== "rejected";
+  };
+
+  const toDayKey = (value: Date) => {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem("dentist");
     if (saved) {
@@ -48,9 +65,22 @@ function DentistDashboard() {
     if (!dentist) return;
     try {
       const queryData = await GetDoctorQueries(dentist.ID);
-      setQueries(queryData || []);
+      const pendingQueries = (queryData || []).filter((q: any) =>
+        isPendingStatus(q.status ?? q.Status)
+      );
+      setQueries(pendingQueries);
     } catch (error) {
       console.error("Failed to load queries", error);
+    }
+  };
+
+  const refreshAppointments = async () => {
+    if (!dentist) return;
+    try {
+      const appointmentData = await GetDoctorAppointments(dentist.ID);
+      setAppointments(appointmentData || []);
+    } catch (error) {
+      console.error("Failed to load appointments", error);
     }
   };
 
@@ -59,18 +89,23 @@ function DentistDashboard() {
       if (!dentist) return;
 
       try {
-        const [profileData, queryData] = await Promise.all([
+        const [profileData, queryData, appointmentData] = await Promise.all([
           GetDentistProfile(dentist.ID),
           GetDoctorQueries(dentist.ID),
+          GetDoctorAppointments(dentist.ID),
         ]);
 
         setProfile(profileData);
-        setQueries(queryData || []);
+        const pendingQueries = (queryData || []).filter((q: any) =>
+          isPendingStatus(q.status ?? q.Status)
+        );
+        setQueries(pendingQueries);
+        setAppointments(appointmentData || []);
         setProfileForm({
-          firstName: profileData.first_Name || "",
-          lastName: profileData.last_Name || "",
-          email: profileData.email_Address || "",
-          phone: profileData.phone_Number || "",
+          firstName: profileData.first_Name ?? profileData.First_Name ?? "",
+          lastName: profileData.last_Name ?? profileData.Last_Name ?? "",
+          email: profileData.email_Address ?? profileData.Email_Address ?? "",
+          phone: profileData.phone_Number ?? profileData.Phone_Number ?? "",
           password: "",
           confirmPassword: "",
         });
@@ -103,10 +138,10 @@ function DentistDashboard() {
       const email = profileForm.email.trim();
       const phone = profileForm.phone.trim();
 
-      if (firstName && firstName !== current.first_Name) updatePayload.First_Name = firstName;
-      if (lastName && lastName !== current.last_Name) updatePayload.Last_Name = lastName;
-      if (email && email !== current.email_Address) updatePayload.Email_Address = email;
-      if (phone && phone !== current.phone_Number) updatePayload.Phone_Number = phone;
+      if (firstName && firstName !== (current.first_Name ?? current.First_Name)) updatePayload.First_Name = firstName;
+      if (lastName && lastName !== (current.last_Name ?? current.Last_Name)) updatePayload.Last_Name = lastName;
+      if (email && email !== (current.email_Address ?? current.Email_Address)) updatePayload.Email_Address = email;
+      if (phone && phone !== (current.phone_Number ?? current.Phone_Number)) updatePayload.Phone_Number = phone;
       if (profileForm.password) updatePayload.Password = profileForm.password;
 
       if (Object.keys(updatePayload).length === 0) {
@@ -135,6 +170,7 @@ function DentistDashboard() {
       await ConfirmDoctorQuery(queryId);
       setStatusMessage("Appointment request accepted.");
       await refreshQueries();
+      await refreshAppointments();
     } catch (error) {
       console.error("Failed to accept appointment request", error);
       setStatusMessage("Unable to accept appointment. Please try again.");
@@ -170,6 +206,59 @@ function DentistDashboard() {
       setRejectQueryId(null);
       setRejectReason("");
     }
+  };
+
+  const appointmentsByDay = useMemo(() => {
+    const grouped = new Map<string, any[]>();
+    for (const appt of appointments) {
+      const rawDate = appt.start_Time ?? appt.Start_Time;
+      if (!rawDate) continue;
+      const date = new Date(rawDate);
+      const key = toDayKey(date);
+      const list = grouped.get(key) ?? [];
+      list.push(appt);
+      grouped.set(key, list);
+    }
+
+    grouped.forEach((list) => {
+      list.sort((a, b) => {
+        const aDate = new Date(a.start_Time ?? a.Start_Time).getTime();
+        const bDate = new Date(b.start_Time ?? b.Start_Time).getTime();
+        return aDate - bDate;
+      });
+    });
+
+    return grouped;
+  }, [appointments]);
+
+  const calendarCells = useMemo(() => {
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const startWeekday = monthStart.getDay();
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const cells: Array<number | null> = [];
+
+    for (let i = 0; i < startWeekday; i += 1) {
+      cells.push(null);
+    }
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      cells.push(day);
+    }
+
+    while (cells.length % 7 !== 0) {
+      cells.push(null);
+    }
+
+    return cells;
+  }, [currentMonth]);
+
+  const monthLabel = currentMonth.toLocaleString([], {
+    month: "long",
+    year: "numeric",
+  });
+
+  const shiftMonth = (offset: number) => {
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
   };
 
   const requestMoveQuery = (queryId: number) => {
@@ -219,6 +308,15 @@ function DentistDashboard() {
           <p className="form-description">
             Manage your patient queries and keep your contact information up to date.
           </p>
+          <div className="dashboard-actions">
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => navigate("/all-queries")}
+            >
+              View all queries
+            </button>
+          </div>
         </div>
 
         <div className="tab-bar">
@@ -228,6 +326,13 @@ function DentistDashboard() {
             onClick={() => setActiveTab("queries")}
           >
             Queries
+          </button>
+          <button
+            type="button"
+            className={`tab-button ${activeTab === "calendar" ? "active" : ""}`}
+            onClick={() => setActiveTab("calendar")}
+          >
+            Calendar
           </button>
           <button
             type="button"
@@ -313,7 +418,13 @@ function DentistDashboard() {
                     : "No date provided";
 
                   const queryId = query.id ?? query.ID;
-                  const isConfirmed = query.confirmed ?? query.Confirmed ?? false;
+                  const status = query.status ?? query.Status ?? "Pending";
+                  const normalizedStatus = status.toString().toLowerCase();
+                  const statusLabel = normalizedStatus === "accepted"
+                    ? "Accepted"
+                    : normalizedStatus === "rejected"
+                      ? "Rejected"
+                      : "Pending";
                   const procedureName =
                     query.Procedure_Name ?? query.procedure_Name ??
                     query.procedure_ID ?? query.Procedure_ID ??
@@ -326,8 +437,8 @@ function DentistDashboard() {
                           <strong>{query.first_Name ?? query.First_Name} {query.surname ?? query.Surname}</strong>
                           <p>{query.email_Address ?? query.Email_Address}</p>
                         </div>
-                        <span className={`badge ${isConfirmed ? "confirmed" : "pending"}`}>
-                          {isConfirmed ? "Confirmed" : "Pending"}
+                        <span className={`badge ${normalizedStatus === "accepted" ? "confirmed" : "pending"}`}>
+                          {statusLabel}
                         </span>
                       </div>
                       <div className="query-card-body">
@@ -336,42 +447,34 @@ function DentistDashboard() {
                         <p><strong>Procedure:</strong> {procedureName}</p>
                         <p><strong>Notes:</strong> {query.additional_Information ?? query.Additional_Information ?? "None"}</p>
                         <div className="query-actions">
-                          {isConfirmed ? (
-                            <button type="button" className="accept-button" disabled>
-                              Accepted
+                          <div className="query-actions-left">
+                            <button
+                              type="button"
+                              className="button button-secondary"
+                              onClick={() => requestMoveQuery(queryId)}
+                              disabled={loadingQueryId === queryId}
+                            >
+                              Move appointment
                             </button>
-                          ) : (
-                            <>
-                              <div className="query-actions-left">
-                                <button
-                                  type="button"
-                                  className="button button-secondary"
-                                  onClick={() => requestMoveQuery(queryId)}
-                                  disabled={loadingQueryId === queryId}
-                                >
-                                  Move appointment
-                                </button>
-                              </div>
-                              <div className="query-actions-right">
-                                <button
-                                  type="button"
-                                  className="accept-button"
-                                  onClick={() => handleAcceptQuery(queryId)}
-                                  disabled={loadingQueryId === queryId}
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                  type="button"
-                                  className="reject-button"
-                                  onClick={() => requestRejectQuery(queryId)}
-                                  disabled={loadingQueryId === queryId}
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            </>
-                          )}
+                          </div>
+                          <div className="query-actions-right">
+                            <button
+                              type="button"
+                              className="accept-button"
+                              onClick={() => handleAcceptQuery(queryId)}
+                              disabled={loadingQueryId === queryId}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              className="reject-button"
+                              onClick={() => requestRejectQuery(queryId)}
+                              disabled={loadingQueryId === queryId}
+                            >
+                              Reject
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -379,6 +482,62 @@ function DentistDashboard() {
                 })}
               </div>
             )}
+          </div>
+        ) : activeTab === "calendar" ? (
+          <div className="calendar-view">
+            <div className="calendar-toolbar">
+              <button type="button" className="button button-secondary" onClick={() => shiftMonth(-1)}>
+                Previous
+              </button>
+              <h2>{monthLabel}</h2>
+              <button type="button" className="button button-secondary" onClick={() => shiftMonth(1)}>
+                Next
+              </button>
+            </div>
+
+            <div className="calendar-grid weekdays">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                <div key={day} className="calendar-weekday">{day}</div>
+              ))}
+            </div>
+
+            <div className="calendar-grid days">
+              {calendarCells.map((day, index) => {
+                if (day == null) {
+                  return <div key={`empty-${index}`} className="calendar-cell empty" />;
+                }
+
+                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                const key = toDayKey(date);
+                const dayAppointments = appointmentsByDay.get(key) ?? [];
+
+                return (
+                  <div key={key} className="calendar-cell">
+                    <div className="calendar-date">{day}</div>
+                    <div className="calendar-appointments">
+                      {dayAppointments.length === 0 ? (
+                        <p className="calendar-empty">No appointments</p>
+                      ) : (
+                        dayAppointments.map((appt, idx) => {
+                          const start = new Date(appt.start_Time ?? appt.Start_Time);
+                          return (
+                            <div key={`${key}-${idx}`} className="calendar-appointment-item">
+                              <strong>{appt.customer_Full_Name ?? appt.Customer_Full_Name ?? "Patient"}</strong>
+                              <span>
+                                {start.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <form className="profile-form" onSubmit={handleProfileSubmit}>

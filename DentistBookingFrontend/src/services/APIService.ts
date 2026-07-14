@@ -77,6 +77,19 @@ export const GetDoctorQueries = async (doctorId: number) => {
   return response.data;
 };
 
+export const GetAllDoctorQueries = async (doctorId: number) => {
+  const response = await axios.get(`${API_BASE}/GetDoctorQueries/${doctorId}`, {
+    params: { includeResolved: true },
+  });
+
+  return response.data;
+};
+
+export const GetDoctorAppointments = async (doctorId: number) => {
+  const response = await axios.get(`${API_BASE}/GetDoctorAppointments/${doctorId}`);
+  return response.data;
+};
+
 export const GetDentistProfile = async (doctorId: number) => {
   const response = await axios.get(`${API_BASE}/DentistProfile/${doctorId}`);
 
@@ -95,7 +108,7 @@ export const ConfirmDoctorQuery = async (queryId: number) => {
 };
 
 export const RejectDoctorQuery = async (queryId: number) => {
-  const response = await axios.delete(`${API_BASE}/RejectDoctorQuery/${queryId}`);
+  const response = await axios.put(`${API_BASE}/RejectDoctorQuery/${queryId}`);
   return response.data;
 };
 

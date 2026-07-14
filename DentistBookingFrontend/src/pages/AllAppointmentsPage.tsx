@@ -26,11 +26,12 @@ function AllAppointmentsPage() {
 
         <div className="list-grid">
           {appointments.map(a => (
-            <div key={a.id} className="list-row">
+            <div key={a.id ?? a.ID} className="list-row">
               <div>
-                <strong>{a.customer_Name || (a.customer ? `${a.customer.first_Name} ${a.customer.last_Name}` : "Customer")}</strong>
+                <strong>{a.customer_Full_Name ?? a.Customer_Full_Name ?? "Customer"}</strong>
                 <p>{new Date(a.start_Time ?? a.Start_Time).toLocaleString()}</p>
                 <p>Doctor ID: {a.dentist_ID ?? a.Dentist_ID}</p>
+                <p>DOB: {a.customer_Date_Of_Birth ?? a.Customer_Date_Of_Birth ?? "N/A"}</p>
               </div>
             </div>
           ))}

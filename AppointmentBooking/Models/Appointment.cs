@@ -8,10 +8,7 @@ namespace AppointmentBooking.Models
     {
         [Key]
         public int ID { get; set; }
-        
-        [Required]
-        public int Customer_ID { get; set; }
-        
+                
         [Required]
         public int Dentist_ID { get; set; }
 
@@ -21,11 +18,11 @@ namespace AppointmentBooking.Models
         [Required]
         public int Duration_mins { get; set; } = 30;
 
-        [NotMapped]
-        public bool Accepted { get; set; } = false;
-
-        [NotMapped]
-        public bool Confirmed { get; set; } = false;
+        [Required]
+        public string Customer_Full_Name {get;set;} = "";
+        
+        [Required]
+        public DateOnly Customer_Date_Of_Birth {get;set;} = DateOnly.FromDateTime(DateTime.MinValue);
 
 
         // [Required, EmailAddress]
