@@ -20,7 +20,8 @@ function DentistDashboard() {
     const now = new Date();
     const start = new Date(now);
     start.setHours(0, 0, 0, 0);
-    start.setDate(now.getDate() - now.getDay());
+    const mondayOffset = (now.getDay() + 6) % 7;
+    start.setDate(now.getDate() - mondayOffset);
     return start;
   });
   const [statusMessage, setStatusMessage] = useState("");

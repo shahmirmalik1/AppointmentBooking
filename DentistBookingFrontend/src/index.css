@@ -459,7 +459,7 @@ select:focus {
 
 .calendar-week-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(170px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -470,6 +470,7 @@ select:focus {
   min-height: 260px;
   display: grid;
   grid-template-rows: auto 1fr;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -485,11 +486,16 @@ select:focus {
 
 .calendar-day-header strong {
   font-size: 0.95rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendar-day-header span {
   font-size: 0.85rem;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .calendar-day-body {
@@ -497,6 +503,7 @@ select:focus {
   align-content: start;
   gap: 8px;
   padding: 10px;
+  min-width: 0;
 }
 
 .calendar-appointment-item {
@@ -507,6 +514,8 @@ select:focus {
   border-radius: 10px;
   padding: 8px;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .calendar-appointment-item strong {
