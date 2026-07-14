@@ -402,6 +402,32 @@ namespace AppointmentBooking.Controllers
             return Ok(queries);
         }
 
+        [HttpGet("GetAllQueries")]
+        public async Task<IActionResult> GetAllQueries()
+        {
+            var queries = await (from q in _db.CustomerQueries
+                                 join p in _db.Procedures on q.Procedure_ID equals p.ID into procedures
+                                 from proc in procedures.DefaultIfEmpty()
+                                 orderby q.Date_Time descending
+                                 select new DoctorQueryResponse
+                                 {
+                                     ID = q.ID,
+                                     First_Name = q.First_Name,
+                                     Surname = q.Surname,
+                                     Date_Of_Birth = q.Date_Of_Birth,
+                                     Email_Address = q.Email_Address,
+                                     Phone_Number = q.Phone_Number,
+                                     Procedure_ID = q.Procedure_ID,
+                                     Procedure_Name = proc != null ? proc.Procedure_Name : null,
+                                     Doctor_ID = q.Doctor_ID,
+                                     Date_Time = q.Date_Time,
+                                     Additional_Information = q.Additional_Information,
+                                     Status = q.Status,
+                                 }).ToListAsync();
+
+            return Ok(queries);
+        }
+
         [HttpGet("GetDoctorAppointments/{doctorID:int}")]
         public async Task<IActionResult> GetDoctorAppointments(int doctorID)
         {
@@ -410,7 +436,46 @@ namespace AppointmentBooking.Controllers
                 .OrderBy(a => a.Start_Time)
                 .ToListAsync();
 
-            return Ok(appointments);
+            var acceptedQueries = await _db.CustomerQueries
+                .Where(q => q.Doctor_ID == doctorID && q.Status == "Accepted")
+                .ToListAsync();
+
+            var procedureIds = acceptedQueries
+                .Where(q => q.Procedure_ID.HasValue)
+                .Select(q => q.Procedure_ID!.Value)
+                .Distinct()
+                .ToList();
+
+            var procedures = await _db.Procedures
+                .Where(p => procedureIds.Contains(p.ID))
+                .ToDictionaryAsync(p => p.ID, p => p.Procedure_Name);
+
+            var response = appointments.Select(a =>
+            {
+                var matchedQuery = acceptedQueries.FirstOrDefault(q =>
+                    q.Date_Time.HasValue
+                    && q.Date_Time.Value == a.Start_Time
+                    && string.Equals($"{q.First_Name} {q.Surname}".Trim(), a.Customer_Full_Name, StringComparison.OrdinalIgnoreCase));
+
+                string? procedureName = null;
+                if (matchedQuery?.Procedure_ID is int procedureId && procedures.TryGetValue(procedureId, out var value))
+                {
+                    procedureName = value;
+                }
+
+                return new DoctorAppointmentResponse
+                {
+                    ID = a.ID,
+                    Dentist_ID = a.Dentist_ID,
+                    Start_Time = a.Start_Time,
+                    Duration_mins = a.Duration_mins,
+                    Customer_Full_Name = a.Customer_Full_Name,
+                    Customer_Date_Of_Birth = a.Customer_Date_Of_Birth,
+                    Procedure_Name = procedureName,
+                };
+            }).ToList();
+
+            return Ok(response);
         }
 
         [HttpPut("ConfirmDoctorQuery/{queryID:int}")]
@@ -567,5 +632,16 @@ namespace AppointmentBooking.Controllers
         public DateTime? Date_Time { get; set; }
         public string? Additional_Information { get; set; }
         public string Status { get; set; } = string.Empty;
+    }
+
+    public class DoctorAppointmentResponse
+    {
+        public int ID { get; set; }
+        public int Dentist_ID { get; set; }
+        public DateTime Start_Time { get; set; }
+        public int Duration_mins { get; set; }
+        public string Customer_Full_Name { get; set; } = string.Empty;
+        public DateOnly Customer_Date_Of_Birth { get; set; }
+        public string? Procedure_Name { get; set; }
     }
 }

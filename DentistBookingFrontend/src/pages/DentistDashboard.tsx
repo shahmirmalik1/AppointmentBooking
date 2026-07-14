@@ -16,7 +16,13 @@ function DentistDashboard() {
   const [queries, setQueries] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("queries");
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(now.getDate() - now.getDay());
+    return start;
+  });
   const [statusMessage, setStatusMessage] = useState("");
   const [loadingQueryId, setLoadingQueryId] = useState<number | null>(null);
   const [rejectQueryId, setRejectQueryId] = useState<number | null>(null);
@@ -231,34 +237,35 @@ function DentistDashboard() {
     return grouped;
   }, [appointments]);
 
-  const calendarCells = useMemo(() => {
-    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const startWeekday = monthStart.getDay();
-    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
-    const cells: Array<number | null> = [];
+  const weekDays = useMemo(() => {
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(currentWeekStart);
+      day.setDate(currentWeekStart.getDate() + index);
+      return day;
+    });
+  }, [currentWeekStart]);
 
-    for (let i = 0; i < startWeekday; i += 1) {
-      cells.push(null);
-    }
+  const weekLabel = useMemo(() => {
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(currentWeekStart.getDate() + 6);
 
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      cells.push(day);
-    }
+    return `${currentWeekStart.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })} - ${weekEnd.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`;
+  }, [currentWeekStart]);
 
-    while (cells.length % 7 !== 0) {
-      cells.push(null);
-    }
-
-    return cells;
-  }, [currentMonth]);
-
-  const monthLabel = currentMonth.toLocaleString([], {
-    month: "long",
-    year: "numeric",
-  });
-
-  const shiftMonth = (offset: number) => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+  const shiftWeek = (offset: number) => {
+    setCurrentWeekStart((prev) => {
+      const next = new Date(prev);
+      next.setDate(prev.getDate() + (offset * 7));
+      return next;
+    });
   };
 
   const requestMoveQuery = (queryId: number) => {
@@ -308,15 +315,6 @@ function DentistDashboard() {
           <p className="form-description">
             Manage your patient queries and keep your contact information up to date.
           </p>
-          <div className="dashboard-actions">
-            <button
-              type="button"
-              className="button button-secondary"
-              onClick={() => navigate("/all-queries")}
-            >
-              View all queries
-            </button>
-          </div>
         </div>
 
         <div className="tab-bar">
@@ -325,7 +323,7 @@ function DentistDashboard() {
             className={`tab-button ${activeTab === "queries" ? "active" : ""}`}
             onClick={() => setActiveTab("queries")}
           >
-            Queries
+            Pending queries
           </button>
           <button
             type="button"
@@ -340,6 +338,13 @@ function DentistDashboard() {
             onClick={() => setActiveTab("details")}
           >
             Personal details
+          </button>
+          <button
+            type="button"
+            className="button button-secondary tab-link-right"
+            onClick={() => navigate("/all-queries")}
+          >
+            View all queries
           </button>
         </div>
 
@@ -486,40 +491,33 @@ function DentistDashboard() {
         ) : activeTab === "calendar" ? (
           <div className="calendar-view">
             <div className="calendar-toolbar">
-              <button type="button" className="button button-secondary" onClick={() => shiftMonth(-1)}>
+              <button type="button" className="button button-secondary" onClick={() => shiftWeek(-1)}>
                 Previous
               </button>
-              <h2>{monthLabel}</h2>
-              <button type="button" className="button button-secondary" onClick={() => shiftMonth(1)}>
+              <h2>{weekLabel}</h2>
+              <button type="button" className="button button-secondary" onClick={() => shiftWeek(1)}>
                 Next
               </button>
             </div>
 
-            <div className="calendar-grid weekdays">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="calendar-weekday">{day}</div>
-              ))}
-            </div>
-
-            <div className="calendar-grid days">
-              {calendarCells.map((day, index) => {
-                if (day == null) {
-                  return <div key={`empty-${index}`} className="calendar-cell empty" />;
-                }
-
-                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-                const key = toDayKey(date);
+            <div className="calendar-week-grid">
+              {weekDays.map((day) => {
+                const key = toDayKey(day);
                 const dayAppointments = appointmentsByDay.get(key) ?? [];
 
                 return (
-                  <div key={key} className="calendar-cell">
-                    <div className="calendar-date">{day}</div>
-                    <div className="calendar-appointments">
+                  <div key={key} className="calendar-day-column">
+                    <div className="calendar-day-header">
+                      <strong>{day.toLocaleDateString([], { weekday: "short" })}</strong>
+                      <span>{day.toLocaleDateString([], { month: "short", day: "numeric" })}</span>
+                    </div>
+                    <div className="calendar-day-body">
                       {dayAppointments.length === 0 ? (
                         <p className="calendar-empty">No appointments</p>
                       ) : (
                         dayAppointments.map((appt, idx) => {
                           const start = new Date(appt.start_Time ?? appt.Start_Time);
+                          const procedureName = appt.procedure_Name ?? appt.Procedure_Name ?? "Procedure not set";
                           return (
                             <div key={`${key}-${idx}`} className="calendar-appointment-item">
                               <strong>{appt.customer_Full_Name ?? appt.Customer_Full_Name ?? "Patient"}</strong>
@@ -529,6 +527,7 @@ function DentistDashboard() {
                                   minute: "2-digit",
                                 })}
                               </span>
+                              <span>{procedureName}</span>
                             </div>
                           );
                         })

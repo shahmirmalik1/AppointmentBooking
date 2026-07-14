@@ -85,6 +85,11 @@ export const GetAllDoctorQueries = async (doctorId: number) => {
   return response.data;
 };
 
+export const GetAllQueries = async () => {
+  const response = await axios.get(`${API_BASE}/GetAllQueries`);
+  return response.data;
+};
+
 export const GetDoctorAppointments = async (doctorId: number) => {
   const response = await axios.get(`${API_BASE}/GetDoctorAppointments/${doctorId}`);
   return response.data;

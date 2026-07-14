@@ -431,8 +431,13 @@ select:focus {
 
 .query-filters {
   display: grid;
-  grid-template-columns: 2fr 1.4fr 1fr;
+  grid-template-columns: 2fr 1.4fr 1fr auto;
   gap: 12px;
+  align-items: end;
+}
+
+.tab-link-right {
+  margin-left: auto;
 }
 
 .calendar-view {
@@ -452,42 +457,46 @@ select:focus {
   font-size: 1.2rem;
 }
 
-.calendar-grid {
+.calendar-week-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(7, minmax(170px, 1fr));
+  gap: 12px;
 }
 
-.calendar-weekday {
-  text-align: center;
-  font-weight: 700;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.calendar-cell {
+.calendar-day-column {
   border: 1px solid var(--border);
   border-radius: 14px;
   background: #ffffff;
-  min-height: 140px;
-  padding: 10px;
+  min-height: 260px;
   display: grid;
-  gap: 10px;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
 }
 
-.calendar-cell.empty {
-  background: #f8fafc;
-  border-style: dashed;
-}
-
-.calendar-date {
-  font-weight: 700;
-  color: var(--text);
-}
-
-.calendar-appointments {
-  display: grid;
+.calendar-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+}
+
+.calendar-day-header strong {
+  font-size: 0.95rem;
+}
+
+.calendar-day-header span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.calendar-day-body {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px;
 }
 
 .calendar-appointment-item {
@@ -497,16 +506,19 @@ select:focus {
   border: 1px solid #dbe2ff;
   border-radius: 10px;
   padding: 8px;
+  min-width: 0;
 }
 
 .calendar-appointment-item strong {
   font-size: 0.85rem;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .calendar-appointment-item span {
   font-size: 0.8rem;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .calendar-empty {
@@ -645,6 +657,15 @@ select:focus {
 
 .dashboard-card {
   padding: 32px;
+  max-width: 1280px;
+}
+
+.contact-card {
+  width: 100%;
+  max-width: 760px;
+  padding: 36px;
+  display: grid;
+  gap: 14px;
 }
 
 @media (max-width: 860px) {
@@ -656,12 +677,17 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
-  .calendar-grid {
-    gap: 8px;
+  .tab-link-right {
+    margin-left: 0;
   }
 
-  .calendar-cell {
-    min-height: 120px;
+  .calendar-week-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .calendar-day-column {
+    min-height: 220px;
   }
 }
 
@@ -670,16 +696,8 @@ select:focus {
     align-items: flex-start;
   }
 
-  .calendar-grid.weekdays {
-    display: none;
-  }
-
-  .calendar-grid.days {
+  .calendar-week-grid {
     grid-template-columns: 1fr;
-  }
-
-  .calendar-cell.empty {
-    display: none;
   }
 }
 

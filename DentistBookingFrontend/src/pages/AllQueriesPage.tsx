@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { GetAllDoctorQueries } from "../services/APIService";
+import { GetAllQueries } from "../services/APIService";
 
 function toMinuteString(value: Date) {
   const year = value.getFullYear();
@@ -18,25 +18,18 @@ function normalizeStatus(status: string | null | undefined) {
 }
 
 function AllQueriesPage() {
-  const [dentistId, setDentistId] = useState<number | null>(null);
   const [queries, setQueries] = useState<any[]>([]);
+  const [nameFilterInput, setNameFilterInput] = useState("");
+  const [statusFilterInput, setStatusFilterInput] = useState("All");
+  const [dateTimeFilterInput, setDateTimeFilterInput] = useState("");
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateTimeFilter, setDateTimeFilter] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("dentist");
-    if (!saved) return;
-
-    const parsed = JSON.parse(saved);
-    setDentistId(parsed.ID ?? parsed.id ?? null);
-  }, []);
-
-  useEffect(() => {
     const load = async () => {
-      if (!dentistId) return;
       try {
-        const data = await GetAllDoctorQueries(dentistId);
+        const data = await GetAllQueries();
         setQueries(data || []);
       } catch (error) {
         console.error("Failed to load all queries", error);
@@ -44,7 +37,7 @@ function AllQueriesPage() {
     };
 
     load();
-  }, [dentistId]);
+  }, []);
 
   const filteredQueries = useMemo(() => {
     return queries.filter((query) => {
@@ -64,16 +57,11 @@ function AllQueriesPage() {
     });
   }, [queries, nameFilter, statusFilter, dateTimeFilter]);
 
-  if (!dentistId) {
-    return (
-      <div className="page-layout">
-        <div className="form-card booking-form">
-          <h1>Access denied</h1>
-          <p>Please login first to view all queries.</p>
-        </div>
-      </div>
-    );
-  }
+  const applyFilters = () => {
+    setNameFilter(nameFilterInput);
+    setStatusFilter(statusFilterInput);
+    setDateTimeFilter(dateTimeFilterInput);
+  };
 
   return (
     <div className="page-layout">
@@ -88,27 +76,31 @@ function AllQueriesPage() {
           <input
             className="form-input"
             placeholder="Filter by patient name"
-            value={nameFilter}
-            onChange={(e) => setNameFilter(e.target.value)}
+            value={nameFilterInput}
+            onChange={(e) => setNameFilterInput(e.target.value)}
           />
 
           <input
             className="form-input"
             type="datetime-local"
-            value={dateTimeFilter}
-            onChange={(e) => setDateTimeFilter(e.target.value)}
+            value={dateTimeFilterInput}
+            onChange={(e) => setDateTimeFilterInput(e.target.value)}
           />
 
           <select
             className="form-input"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            value={statusFilterInput}
+            onChange={(e) => setStatusFilterInput(e.target.value)}
           >
             <option value="All">All statuses</option>
             <option value="Pending">Pending</option>
             <option value="Accepted">Accepted</option>
             <option value="Rejected">Rejected</option>
           </select>
+
+          <button type="button" className="button button-primary" onClick={applyFilters}>
+            Go
+          </button>
         </div>
 
         <p className="form-note">Showing {filteredQueries.length} of {queries.length} queries.</p>
