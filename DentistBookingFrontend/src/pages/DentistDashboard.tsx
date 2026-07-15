@@ -216,8 +216,13 @@ function DentistDashboard() {
   };
 
   const appointmentsByDay = useMemo(() => {
+    const visibleAppointments = appointments.filter((appt) => {
+      const doctorId = appt.dentist_ID ?? appt.Dentist_ID;
+      return !dentist || doctorId === dentist.ID;
+    });
+
     const grouped = new Map<string, any[]>();
-    for (const appt of appointments) {
+    for (const appt of visibleAppointments) {
       const rawDate = appt.start_Time ?? appt.Start_Time;
       if (!rawDate) continue;
       const date = new Date(rawDate);
@@ -236,7 +241,7 @@ function DentistDashboard() {
     });
 
     return grouped;
-  }, [appointments]);
+  }, [appointments, dentist]);
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, index) => {
@@ -519,6 +524,7 @@ function DentistDashboard() {
                         dayAppointments.map((appt, idx) => {
                           const start = new Date(appt.start_Time ?? appt.Start_Time);
                           const procedureName = appt.procedure_Name ?? appt.Procedure_Name ?? "Procedure not set";
+                          const doctorName = `${dentist.First_Name} ${dentist.Last_Name}`.trim();
                           return (
                             <div key={`${key}-${idx}`} className="calendar-appointment-item">
                               <strong>{appt.customer_Full_Name ?? appt.Customer_Full_Name ?? "Patient"}</strong>
@@ -528,6 +534,7 @@ function DentistDashboard() {
                                   minute: "2-digit",
                                 })}
                               </span>
+                              <span><strong>Doctor:</strong> {doctorName}</span>
                               <span>{procedureName}</span>
                             </div>
                           );
