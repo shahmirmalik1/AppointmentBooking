@@ -7,6 +7,22 @@
       "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\controllers\\appointmentbookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\customerquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\customerquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\appointment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\appointment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -19,20 +35,12 @@
       "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\doctorprocedures.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\customerquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\customerquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\procedure.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\procedure.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\models\\institutioninformation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\models\\institutioninformation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|solutionrelative:appointmentbooking\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6A9F0906-C628-49DA-97C2-DA0650C808BA}|AppointmentBooking\\AppointmentBooking.csproj|c:\\users\\shahmir\\source\\repos\\appointmentbooking\\appointmentbooking\\appointmentbooking.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
@@ -50,23 +58,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
+              "Title": "ApplicationDBContext.cs",
+              "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Data\\ApplicationDBContext.cs",
+              "RelativeDocumentMoniker": "AppointmentBooking\\Data\\ApplicationDBContext.cs",
+              "ToolTip": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Data\\ApplicationDBContext.cs",
+              "RelativeToolTip": "AppointmentBooking\\Data\\ApplicationDBContext.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwAcAAABhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-19T11:18:06.639Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Customer.cs",
+              "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\Customer.cs",
+              "RelativeDocumentMoniker": "AppointmentBooking\\Models\\Customer.cs",
+              "ToolTip": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\Customer.cs",
+              "RelativeToolTip": "AppointmentBooking\\Models\\Customer.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-19T11:28:39.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "CustomerQuery.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\CustomerQuery.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\CustomerQuery.cs",
               "ToolTip": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\CustomerQuery.cs",
               "RelativeToolTip": "AppointmentBooking\\Models\\CustomerQuery.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAADwvxcAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAABMAAAAAAAAAAAAkwAcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-07T11:59:16.575Z"
+              "WhenOpened": "2026-06-07T11:59:16.575Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "Procedure.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\Procedure.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\Procedure.cs",
@@ -78,7 +113,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 6,
               "Title": "Doctor.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\Doctor.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\Doctor.cs",
@@ -90,19 +125,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Program.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Program.cs",
               "ToolTip": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Program.cs",
               "RelativeToolTip": "AppointmentBooking\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-14T18:57:19.531Z"
+              "WhenOpened": "2025-10-14T18:57:19.531Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "Appointment.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\Appointment.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\Appointment.cs",
@@ -120,14 +156,14 @@
               "RelativeDocumentMoniker": "AppointmentBooking\\Controllers\\AppointmentBookingController.cs",
               "ToolTip": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Controllers\\AppointmentBookingController.cs",
               "RelativeToolTip": "AppointmentBooking\\Controllers\\AppointmentBookingController.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAA5wBAAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAAG0BAAAAAAAAAAAswHgBAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-14T19:00:08.112Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "DoctorProcedures.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\DoctorProcedures.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\DoctorProcedures.cs",
@@ -139,7 +175,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 9,
               "Title": "InstitutionInformation.cs",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\Models\\InstitutionInformation.cs",
               "RelativeDocumentMoniker": "AppointmentBooking\\Models\\InstitutionInformation.cs",
@@ -151,7 +187,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "AppointmentBooking.http",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.http",
               "RelativeDocumentMoniker": "AppointmentBooking\\AppointmentBooking.http",
@@ -163,7 +199,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\appsettings.json",
               "RelativeDocumentMoniker": "AppointmentBooking\\appsettings.json",

@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { GetAllQueries } from "../services/APIService";
+import {
+  ConfirmDoctorQuery,
+  GetAllQueries,
+  MoveDoctorQuery,
+  RejectDoctorQuery,
+} from "../services/APIService";
 
 function toMinuteString(value: Date) {
   const year = value.getFullYear();
@@ -14,6 +19,7 @@ function normalizeStatus(status: string | null | undefined) {
   const value = (status ?? "Pending").toString().trim().toLowerCase();
   if (value === "accepted") return "Accepted";
   if (value === "rejected") return "Rejected";
+  if (value === "move appointment") return "Move Appointment";
   return "Pending";
 }
 
@@ -25,6 +31,8 @@ function AllQueriesPage() {
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [dateTimeFilter, setDateTimeFilter] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [loadingQueryId, setLoadingQueryId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -63,6 +71,40 @@ function AllQueriesPage() {
     setDateTimeFilter(dateTimeFilterInput);
   };
 
+  const handleStatusChange = async (queryId: number, nextStatus: string) => {
+    if (!nextStatus) return;
+
+    setStatusMessage("");
+    setLoadingQueryId(queryId);
+    try {
+      if (nextStatus === "Accepted") {
+        await ConfirmDoctorQuery(queryId);
+      } else if (nextStatus === "Rejected") {
+        await RejectDoctorQuery(queryId);
+      } else if (nextStatus === "Move Appointment") {
+        await MoveDoctorQuery(queryId);
+      }
+
+      setQueries((previous) =>
+        previous.map((query) => {
+          const currentId = query.id ?? query.ID;
+          if (currentId !== queryId) return query;
+          return {
+            ...query,
+            status: nextStatus,
+            Status: nextStatus,
+          };
+        })
+      );
+      setStatusMessage(`Query ${queryId} updated to ${nextStatus}.`);
+    } catch (error) {
+      console.error("Failed to update query status", error);
+      setStatusMessage("Unable to update query status. Please try again.");
+    } finally {
+      setLoadingQueryId(null);
+    }
+  };
+
   return (
     <div className="page-layout">
       <div className="form-card booking-form dashboard-card">
@@ -96,6 +138,7 @@ function AllQueriesPage() {
             <option value="Pending">Pending</option>
             <option value="Accepted">Accepted</option>
             <option value="Rejected">Rejected</option>
+            <option value="Move Appointment">Move appointment</option>
           </select>
 
           <button type="button" className="button button-primary" onClick={applyFilters}>
@@ -104,6 +147,7 @@ function AllQueriesPage() {
         </div>
 
         <p className="form-note">Showing {filteredQueries.length} of {queries.length} queries.</p>
+        {statusMessage && <p className="form-note">{statusMessage}</p>}
 
         {filteredQueries.length === 0 ? (
           <p className="form-note">No queries match the selected filters.</p>
@@ -130,6 +174,18 @@ function AllQueriesPage() {
                     <p><strong>Requested:</strong> {queryDate ? queryDate.toLocaleString() : "No date provided"}</p>
                     <p><strong>Procedure:</strong> {query.Procedure_Name ?? query.procedure_Name ?? "N/A"}</p>
                     <p><strong>Notes:</strong> {query.additional_Information ?? query.Additional_Information ?? "None"}</p>
+                    <div className="query-actions">
+                      <select
+                        className="form-input"
+                        value={status}
+                        onChange={(e) => handleStatusChange(queryId, e.target.value)}
+                        disabled={loadingQueryId === queryId}
+                      >
+                        <option value="Accepted" disabled={status === "Accepted"}>Accept</option>
+                        <option value="Rejected" disabled={status === "Rejected"}>Reject</option>
+                        <option value="Move Appointment" disabled={status === "Move Appointment"}>Move appointment</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               );

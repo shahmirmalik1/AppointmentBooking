@@ -48,6 +48,69 @@
         }
       }
     },
+    "/api/AppointmentBooking/DentistProfile/{doctorID}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "doctorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "doctorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DentistProfileUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DentistProfileUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DentistProfileUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/AppointmentBooking/GetAvailableSlots": {
       "get": {
         "tags": [
@@ -104,6 +167,68 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/Doctor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/CreateProcedure": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Procedure"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Procedure"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Procedure"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/LinkDoctorProcedure": {
+      "post": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorProcedures"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorProcedures"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorProcedures"
               }
             }
           }
@@ -336,6 +461,95 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "includeResolved",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetAllQueries": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/GetDoctorAppointments/{doctorID}": {
+      "get": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "doctorID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/ConfirmDoctorQuery/{queryID}": {
+      "put": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "queryID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/AppointmentBooking/RejectDoctorQuery/{queryID}": {
+      "put": {
+        "tags": [
+          "AppointmentBooking"
+        ],
+        "parameters": [
+          {
+            "name": "queryID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -379,8 +593,8 @@
     "schemas": {
       "Appointment": {
         "required": [
-          "confirmed",
-          "customer_ID",
+          "customer_Date_Of_Birth",
+          "customer_Full_Name",
           "dentist_ID",
           "duration_mins",
           "start_Time"
@@ -388,10 +602,6 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "customer_ID": {
             "type": "integer",
             "format": "int32"
           },
@@ -407,8 +617,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "confirmed": {
-            "type": "boolean"
+          "customer_Full_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "customer_Date_Of_Birth": {
+            "type": "string",
+            "format": "date"
           }
         },
         "additionalProperties": false
@@ -447,10 +662,7 @@
       },
       "CustomerQuery": {
         "required": [
-          "confirmed",
-          "email_Address",
           "first_Name",
-          "phone_Number",
           "surname"
         ],
         "type": "object",
@@ -467,13 +679,17 @@
             "minLength": 1,
             "type": "string"
           },
+          "date_Of_Birth": {
+            "type": "string",
+            "format": "date"
+          },
           "email_Address": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "phone_Number": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "procedure_ID": {
             "type": "integer",
@@ -494,8 +710,35 @@
             "type": "string",
             "nullable": true
           },
-          "confirmed": {
-            "type": "boolean"
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DentistProfileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "first_Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email_Address": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone_Number": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -540,6 +783,28 @@
         },
         "additionalProperties": false
       },
+      "DoctorProcedures": {
+        "required": [
+          "doctorID",
+          "procedureID"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "doctorID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "procedureID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -550,9 +815,33 @@
           "password": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Procedure": {
+        "required": [
+          "price",
+          "procedure_Duration_mins",
+          "procedure_Name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
           },
-          "debugHash": {
-            "type": "boolean"
+          "procedure_Name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "procedure_Duration_mins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

@@ -117,6 +117,11 @@ export const RejectDoctorQuery = async (queryId: number) => {
   return response.data;
 };
 
+export const MoveDoctorQuery = async (queryId: number) => {
+  const response = await axios.put(`${API_BASE}/MoveDoctorQuery/${queryId}`);
+  return response.data;
+};
+
 export const GetDoctorFreeTimes = async (
   doctorId: number,
   date: string

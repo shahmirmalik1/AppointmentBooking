@@ -365,7 +365,7 @@ namespace AppointmentBooking.Controllers
                 Status = string.IsNullOrWhiteSpace(dto.Status) ? "Pending" : dto.Status,
             };
 
-            _db.CustomerQueries.Add(appt);
+            _db.CustomerQuery.Add(appt);
             await _db.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetById), new { id = appt.ID }, appt);
@@ -374,7 +374,7 @@ namespace AppointmentBooking.Controllers
         [HttpGet("GetDoctorQueries/{doctorID:int}")]
         public async Task<IActionResult> GetDoctorQueries(int doctorID, [FromQuery] bool includeResolved = false)
         {
-            var queries = await (from q in _db.CustomerQueries
+            var queries = await (from q in _db.CustomerQuery
                                  where q.Doctor_ID == doctorID
                                     && (includeResolved
                                         || q.Status == null
@@ -386,17 +386,17 @@ namespace AppointmentBooking.Controllers
                                  select new DoctorQueryResponse
                                  {
                                      ID = q.ID,
-                                     First_Name = q.First_Name,
-                                     Surname = q.Surname,
+                                     First_Name = q.First_Name ?? string.Empty,
+                                     Surname = q.Surname ?? string.Empty,
                                      Date_Of_Birth = q.Date_Of_Birth,
-                                     Email_Address = q.Email_Address,
-                                     Phone_Number = q.Phone_Number,
+                                     Email_Address = q.Email_Address ?? string.Empty,
+                                     Phone_Number = q.Phone_Number ?? string.Empty,
                                      Procedure_ID = q.Procedure_ID,
-                                     Procedure_Name = proc != null ? proc.Procedure_Name : null,
+                                     Procedure_Name = proc != null ? (proc.Procedure_Name ?? string.Empty) : null,
                                      Doctor_ID = q.Doctor_ID,
                                      Date_Time = q.Date_Time,
                                      Additional_Information = q.Additional_Information,
-                                     Status = q.Status,
+                                     Status = q.Status ?? "Pending",
                                  }).ToListAsync();
 
             return Ok(queries);
@@ -405,24 +405,27 @@ namespace AppointmentBooking.Controllers
         [HttpGet("GetAllQueries")]
         public async Task<IActionResult> GetAllQueries()
         {
-            var queries = await (from q in _db.CustomerQueries
+            var existing = await _db.CustomerQuery
+                .ToListAsync();
+            return Ok(existing);
+            var queries = await (from q in _db.CustomerQuery
                                  join p in _db.Procedures on q.Procedure_ID equals p.ID into procedures
                                  from proc in procedures.DefaultIfEmpty()
                                  orderby q.Date_Time descending
                                  select new DoctorQueryResponse
                                  {
                                      ID = q.ID,
-                                     First_Name = q.First_Name,
-                                     Surname = q.Surname,
+                                     First_Name = q.First_Name ?? string.Empty,
+                                     Surname = q.Surname ?? string.Empty,
                                      Date_Of_Birth = q.Date_Of_Birth,
-                                     Email_Address = q.Email_Address,
-                                     Phone_Number = q.Phone_Number,
+                                     Email_Address = q.Email_Address ?? string.Empty,
+                                     Phone_Number = q.Phone_Number ?? string.Empty,
                                      Procedure_ID = q.Procedure_ID,
-                                     Procedure_Name = proc != null ? proc.Procedure_Name : null,
+                                     Procedure_Name = proc != null ? (proc.Procedure_Name ?? string.Empty) : null,
                                      Doctor_ID = q.Doctor_ID,
                                      Date_Time = q.Date_Time,
                                      Additional_Information = q.Additional_Information,
-                                     Status = q.Status,
+                                     Status = q.Status ?? "Pending",
                                  }).ToListAsync();
 
             return Ok(queries);
@@ -436,7 +439,7 @@ namespace AppointmentBooking.Controllers
                 .OrderBy(a => a.Start_Time)
                 .ToListAsync();
 
-            var acceptedQueries = await _db.CustomerQueries
+            var acceptedQueries = await _db.CustomerQuery
                 .Where(q => q.Doctor_ID == doctorID && q.Status == "Accepted")
                 .ToListAsync();
 
@@ -481,7 +484,7 @@ namespace AppointmentBooking.Controllers
         [HttpPut("ConfirmDoctorQuery/{queryID:int}")]
         public async Task<IActionResult> ConfirmDoctorQuery(int queryID)
         {
-            var query = await _db.CustomerQueries.FindAsync(queryID);
+            var query = await _db.CustomerQuery.FindAsync(queryID);
             if (query == null) return NotFound();
 
             if (string.Equals(query.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
@@ -538,7 +541,7 @@ namespace AppointmentBooking.Controllers
         [HttpPut("RejectDoctorQuery/{queryID:int}")]
         public async Task<IActionResult> RejectDoctorQuery(int queryID)
         {
-            var query = await _db.CustomerQueries.FindAsync(queryID);
+            var query = await _db.CustomerQuery.FindAsync(queryID);
             if (query == null) return NotFound();
 
             if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
@@ -547,6 +550,23 @@ namespace AppointmentBooking.Controllers
             }
 
             query.Status = "Rejected";
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut("MoveDoctorQuery/{queryID:int}")]
+        public async Task<IActionResult> MoveDoctorQuery(int queryID)
+        {
+            var query = await _db.CustomerQuery.FindAsync(queryID);
+            if (query == null) return NotFound();
+
+            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(query.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict("Resolved queries cannot be moved.");
+            }
+
+            query.Status = "Move Appointment";
             await _db.SaveChangesAsync();
             return Ok();
         }

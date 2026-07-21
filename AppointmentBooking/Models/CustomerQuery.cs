@@ -10,19 +10,16 @@ namespace AppointmentBooking.Models
         public int ID { get; set; }
 
         [Required]
-        public string First_Name { get; set; }
+        public string First_Name { get; set; } = "";
 
         [Required]
-        public string Surname { get; set; }
-        
-        [Required]
+        public string Surname { get; set; } = "";
+
         public DateOnly Date_Of_Birth {get;set;} = DateOnly.FromDateTime(DateTime.MinValue);
 
-        [Required]
-        public string Email_Address { get; set; }
+        public string Email_Address { get; set; } = "";
 
-        [Required]
-        public string Phone_Number { get; set; }
+        public string Phone_Number { get; set; } = "";
 
         public int? Procedure_ID { get; set; }
         public int? Doctor_ID { get; set; }
@@ -31,7 +28,6 @@ namespace AppointmentBooking.Models
 
         public string? Additional_Information { get; set; }
 
-        [Required]
         public string Status { get; set; } = "Pending";
     }
 }
