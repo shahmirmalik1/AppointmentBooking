@@ -122,6 +122,13 @@ export const MoveDoctorQuery = async (queryId: number) => {
   return response.data;
 };
 
+export const UpdateDoctorQueryStatus = async (queryId: number, status: string) => {
+  const response = await axios.put(`${API_BASE}/UpdateDoctorQueryStatus/${queryId}`, {
+    status,
+  });
+  return response.data;
+};
+
 export const GetDoctorFreeTimes = async (
   doctorId: number,
   date: string

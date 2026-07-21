@@ -592,11 +592,37 @@ select:focus {
 
 .query-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   margin-top: 18px;
+}
+
+.query-actions .button {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.query-status-select {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  font-size: 1rem;
+  padding-top: 13px;
+  padding-bottom: 13px;
+  flex: 0 0 auto;
+}
+
+.query-sections {
+  display: grid;
+  gap: 24px;
+}
+
+.section-title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  color: var(--text);
 }
 
 .query-actions-left,
@@ -707,6 +733,17 @@ select:focus {
 
   .calendar-week-grid {
     grid-template-columns: 1fr;
+  }
+
+  .query-actions {
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .query-status-select {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
   }
 }
 

@@ -405,9 +405,6 @@ namespace AppointmentBooking.Controllers
         [HttpGet("GetAllQueries")]
         public async Task<IActionResult> GetAllQueries()
         {
-            var existing = await _db.CustomerQuery
-                .ToListAsync();
-            return Ok(existing);
             var queries = await (from q in _db.CustomerQuery
                                  join p in _db.Procedures on q.Procedure_ID equals p.ID into procedures
                                  from proc in procedures.DefaultIfEmpty()
@@ -484,22 +481,97 @@ namespace AppointmentBooking.Controllers
         [HttpPut("ConfirmDoctorQuery/{queryID:int}")]
         public async Task<IActionResult> ConfirmDoctorQuery(int queryID)
         {
+            return await SetQueryStatus(queryID, "Accepted");
+        }
+
+        [HttpPut("RejectDoctorQuery/{queryID:int}")]
+        public async Task<IActionResult> RejectDoctorQuery(int queryID)
+        {
+            return await SetQueryStatus(queryID, "Rejected");
+        }
+
+        [HttpPut("MoveDoctorQuery/{queryID:int}")]
+        public async Task<IActionResult> MoveDoctorQuery(int queryID)
+        {
+            return await SetQueryStatus(queryID, "Move Appointment");
+        }
+
+        [HttpPut("UpdateDoctorQueryStatus/{queryID:int}")]
+        public async Task<IActionResult> UpdateDoctorQueryStatus(int queryID, [FromBody] DoctorQueryStatusUpdateRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Status))
+            {
+                return BadRequest("Status is required.");
+            }
+
+            return await SetQueryStatus(queryID, request.Status);
+        }
+
+        private async Task<IActionResult> SetQueryStatus(int queryID, string requestedStatus)
+        {
             var query = await _db.CustomerQuery.FindAsync(queryID);
             if (query == null) return NotFound();
 
-            if (string.Equals(query.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            var nextStatus = NormalizeQueryStatus(requestedStatus);
+            if (nextStatus == null)
             {
-                return Conflict("Rejected queries cannot be accepted.");
+                return BadRequest("Invalid status. Allowed values are Accepted, Rejected, Move Appointment, and Pending.");
             }
 
-            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
+            var currentStatus = NormalizeQueryStatus(query.Status) ?? "Pending";
+            if (nextStatus == currentStatus)
             {
-                return Conflict("This query is already accepted.");
+                return Ok(new { Status = currentStatus });
             }
 
+            if (nextStatus == "Accepted")
+            {
+                var ensureResult = await EnsureAppointmentForAcceptedQuery(query);
+                if (!ensureResult.Success)
+                {
+                    return Conflict(ensureResult.Error);
+                }
+            }
+            else if (currentStatus == "Accepted")
+            {
+                await RemoveAppointmentsForQuery(query);
+            }
+
+            query.Status = nextStatus;
+            await _db.SaveChangesAsync();
+            return Ok(new { Status = nextStatus });
+        }
+
+        private static string? NormalizeQueryStatus(string? status)
+        {
+            var normalized = (status ?? "Pending").Trim();
+            if (normalized.Equals("Accepted", StringComparison.OrdinalIgnoreCase)) return "Accepted";
+            if (normalized.Equals("Rejected", StringComparison.OrdinalIgnoreCase)) return "Rejected";
+            if (normalized.Equals("Move Appointment", StringComparison.OrdinalIgnoreCase)) return "Move Appointment";
+            if (normalized.Equals("Pending", StringComparison.OrdinalIgnoreCase)) return "Pending";
+            return null;
+        }
+
+        private async Task<(bool Success, string? Error)> EnsureAppointmentForAcceptedQuery(CustomerQuery query)
+        {
             if (!query.Doctor_ID.HasValue || !query.Date_Time.HasValue)
             {
-                return BadRequest("Doctor and appointment time are required to accept a query.");
+                return (false, "Doctor and appointment time are required to accept a query.");
+            }
+
+            var dentistId = query.Doctor_ID.Value;
+            var startTime = query.Date_Time.Value;
+            var customerName = $"{query.First_Name} {query.Surname}".Trim();
+
+            var existing = await _db.Appointments.AnyAsync(a =>
+                a.Dentist_ID == dentistId
+                && a.Start_Time == startTime
+                && a.Customer_Date_Of_Birth == query.Date_Of_Birth
+                && a.Customer_Full_Name.ToLower() == customerName.ToLower());
+
+            if (existing)
+            {
+                return (true, null);
             }
 
             var procedureDuration = 30;
@@ -512,63 +584,51 @@ namespace AppointmentBooking.Controllers
                 }
             }
 
-            var startTime = query.Date_Time.Value;
             var hasConflict = await _db.Appointments.AnyAsync(a =>
-                a.Dentist_ID == query.Doctor_ID.Value &&
-                a.Start_Time < startTime.AddMinutes(procedureDuration) &&
-                a.Start_Time.AddMinutes(a.Duration_mins) > startTime);
+                a.Dentist_ID == dentistId
+                && a.Start_Time < startTime.AddMinutes(procedureDuration)
+                && a.Start_Time.AddMinutes(a.Duration_mins) > startTime);
 
             if (hasConflict)
             {
-                return Conflict("Selected slot is already taken.");
+                return (false, "Selected slot is already taken.");
             }
 
             var appointment = new Appointment
             {
-                Dentist_ID = query.Doctor_ID.Value,
+                Dentist_ID = dentistId,
                 Start_Time = startTime,
                 Duration_mins = procedureDuration,
-                Customer_Full_Name = $"{query.First_Name} {query.Surname}".Trim(),
+                Customer_Full_Name = customerName,
                 Customer_Date_Of_Birth = query.Date_Of_Birth,
             };
 
             _db.Appointments.Add(appointment);
-            query.Status = "Accepted";
-            await _db.SaveChangesAsync();
-            return Ok(appointment);
+            return (true, null);
         }
 
-        [HttpPut("RejectDoctorQuery/{queryID:int}")]
-        public async Task<IActionResult> RejectDoctorQuery(int queryID)
+        private async Task RemoveAppointmentsForQuery(CustomerQuery query)
         {
-            var query = await _db.CustomerQuery.FindAsync(queryID);
-            if (query == null) return NotFound();
-
-            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
+            if (!query.Doctor_ID.HasValue || !query.Date_Time.HasValue)
             {
-                return Conflict("Accepted queries cannot be rejected.");
+                return;
             }
 
-            query.Status = "Rejected";
-            await _db.SaveChangesAsync();
-            return Ok();
-        }
+            var dentistId = query.Doctor_ID.Value;
+            var startTime = query.Date_Time.Value;
+            var customerName = $"{query.First_Name} {query.Surname}".Trim().ToLower();
 
-        [HttpPut("MoveDoctorQuery/{queryID:int}")]
-        public async Task<IActionResult> MoveDoctorQuery(int queryID)
-        {
-            var query = await _db.CustomerQuery.FindAsync(queryID);
-            if (query == null) return NotFound();
+            var appointments = await _db.Appointments
+                .Where(a => a.Dentist_ID == dentistId
+                    && a.Start_Time == startTime
+                    && a.Customer_Date_Of_Birth == query.Date_Of_Birth
+                    && a.Customer_Full_Name.ToLower() == customerName)
+                .ToListAsync();
 
-            if (string.Equals(query.Status, "Accepted", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(query.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            if (appointments.Count > 0)
             {
-                return Conflict("Resolved queries cannot be moved.");
+                _db.Appointments.RemoveRange(appointments);
             }
-
-            query.Status = "Move Appointment";
-            await _db.SaveChangesAsync();
-            return Ok();
         }
 
         [HttpGet("GetDoctorFreeTimes")]
@@ -636,6 +696,11 @@ namespace AppointmentBooking.Controllers
         public string? Email_Address { get; set; }
         public string? Phone_Number { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class DoctorQueryStatusUpdateRequest
+    {
+        public string Status { get; set; } = string.Empty;
     }
 
     public class DoctorQueryResponse
