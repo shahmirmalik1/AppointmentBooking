@@ -273,6 +273,10 @@ namespace AppointmentBooking.Controllers
             {
                 Customer_Full_Name = dto.Customer_Full_Name,
                 Customer_Date_Of_Birth = dto.Customer_Date_Of_Birth,
+                Customer_Phone_Number = dto.Customer_Phone_Number,
+                Customer_Email_Address = dto.Customer_Email_Address ?? string.Empty,
+                Completed = dto.Completed,
+                Notes = dto.Notes ?? string.Empty,
                 Dentist_ID = dto.Dentist_ID,
                 Start_Time = dto.Start_Time,
                 Duration_mins = dto.Duration_mins
@@ -312,6 +316,45 @@ namespace AppointmentBooking.Controllers
             _db.Appointments.Remove(appt);
             await _db.SaveChangesAsync();
             return NoContent();
+        }
+
+        [HttpPut("UpdateAppointment/{appointmentID:int}")]
+        public async Task<IActionResult> UpdateAppointment(int appointmentID, [FromBody] AppointmentUpdateRequest request)
+        {
+            var appointment = await _db.Appointments.FindAsync(appointmentID);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            if (request.Customer_Full_Name != null)
+            {
+                appointment.Customer_Full_Name = request.Customer_Full_Name.Trim();
+            }
+
+            if (request.Customer_Phone_Number.HasValue)
+            {
+                appointment.Customer_Phone_Number = request.Customer_Phone_Number.Value;
+            }
+
+            if (request.Customer_Email_Address != null)
+            {
+                appointment.Customer_Email_Address = request.Customer_Email_Address.Trim();
+            }
+
+            if (request.Notes != null)
+            {
+                appointment.Notes = request.Notes.Trim();
+            }
+
+            if (request.Completed.HasValue)
+            {
+                appointment.Completed = request.Completed.Value;
+            }
+
+            await _db.SaveChangesAsync();
+
+            return Ok(appointment);
         }
 
         [HttpGet("GetContactInformation/{id:int}")]
@@ -471,6 +514,10 @@ namespace AppointmentBooking.Controllers
                     Duration_mins = a.Duration_mins,
                     Customer_Full_Name = a.Customer_Full_Name,
                     Customer_Date_Of_Birth = a.Customer_Date_Of_Birth,
+                    Customer_Phone_Number = a.Customer_Phone_Number,
+                    Customer_Email_Address = a.Customer_Email_Address ?? string.Empty,
+                    Completed = a.Completed,
+                    Notes = a.Notes ?? string.Empty,
                     Procedure_Name = procedureName,
                 };
             }).ToList();
@@ -601,6 +648,10 @@ namespace AppointmentBooking.Controllers
                 Duration_mins = procedureDuration,
                 Customer_Full_Name = customerName,
                 Customer_Date_Of_Birth = query.Date_Of_Birth,
+                Customer_Phone_Number = int.TryParse(query.Phone_Number, out var phone) ? phone : 0,
+                Customer_Email_Address = query.Email_Address ?? string.Empty,
+                Completed = false,
+                Notes = query.Additional_Information ?? string.Empty,
             };
 
             _db.Appointments.Add(appointment);
@@ -703,6 +754,15 @@ namespace AppointmentBooking.Controllers
         public string Status { get; set; } = string.Empty;
     }
 
+    public class AppointmentUpdateRequest
+    {
+        public string? Customer_Full_Name { get; set; }
+        public int? Customer_Phone_Number { get; set; }
+        public string? Customer_Email_Address { get; set; }
+        public bool? Completed { get; set; }
+        public string? Notes { get; set; }
+    }
+
     public class DoctorQueryResponse
     {
         public int ID { get; set; }
@@ -727,6 +787,10 @@ namespace AppointmentBooking.Controllers
         public int Duration_mins { get; set; }
         public string Customer_Full_Name { get; set; } = string.Empty;
         public DateOnly Customer_Date_Of_Birth { get; set; }
+        public int Customer_Phone_Number { get; set; }
+        public string Customer_Email_Address { get; set; } = string.Empty;
+        public bool Completed { get; set; }
+        public string Notes { get; set; } = string.Empty;
         public string? Procedure_Name { get; set; }
     }
 }

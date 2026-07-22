@@ -567,6 +567,24 @@ select:focus {
   overflow: hidden;
 }
 
+.calendar-appointment-button {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.calendar-appointment-button:hover {
+  transform: translateY(-1px);
+  border-color: #c7d2fe;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+}
+
+.calendar-appointment-button:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
 .calendar-appointment-item strong {
   font-size: 0.85rem;
   line-height: 1.2;
@@ -583,6 +601,59 @@ select:focus {
   margin: 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.appointment-detail-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.appointment-detail-grid p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.appointment-field {
+  min-width: 0;
+}
+
+.appointment-field-full {
+  grid-column: 1 / -1;
+}
+
+.appointment-field-input-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.appointment-field-input-wrap .form-input,
+.appointment-field-input-wrap .form-textarea {
+  flex: 1;
+}
+
+.icon-button {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 10px 12px;
+}
+
+.icon-button:hover {
+  background: #f8fafc;
+}
+
+.appointment-notes {
+  min-height: 92px;
+}
+
+.appointment-field .form-input[readonly],
+.appointment-field .form-textarea[readonly] {
+  background: #f8fafc;
 }
 
 .tab-button {
@@ -790,6 +861,10 @@ select:focus {
 
   .calendar-day-column {
     min-height: 220px;
+  }
+
+  .appointment-detail-grid {
+    grid-template-columns: 1fr;
   }
 }
 

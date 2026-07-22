@@ -95,6 +95,11 @@ export const GetDoctorAppointments = async (doctorId: number) => {
   return response.data;
 };
 
+export const UpdateAppointment = async (appointmentId: number, payload: any) => {
+  const response = await axios.put(`${API_BASE}/UpdateAppointment/${appointmentId}`, payload);
+  return response.data;
+};
+
 export const GetDentistProfile = async (doctorId: number) => {
   const response = await axios.get(`${API_BASE}/DentistProfile/${doctorId}`);
 

@@ -7,6 +7,7 @@ import {
   UpdateDentistProfile,
   ConfirmDoctorQuery,
   RejectDoctorQuery,
+  UpdateAppointment,
 } from "../services/APIService";
 
 function DentistDashboard() {
@@ -16,6 +17,7 @@ function DentistDashboard() {
   const [queries, setQueries] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("queries");
+  const [calendarWeekInitialized, setCalendarWeekInitialized] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const now = new Date();
     const start = new Date(now);
@@ -30,6 +32,16 @@ function DentistDashboard() {
   const [rejectReason, setRejectReason] = useState("");
   const [moveQueryId, setMoveQueryId] = useState<number | null>(null);
   const [moveReason, setMoveReason] = useState("");
+  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
+  const [appointmentMessage, setAppointmentMessage] = useState("");
+  const [savingAppointment, setSavingAppointment] = useState(false);
+  const [editableAppointmentFields, setEditableAppointmentFields] = useState<Record<string, boolean>>({});
+  const [appointmentForm, setAppointmentForm] = useState({
+    customerFullName: "",
+    customerPhoneNumber: "",
+    customerEmailAddress: "",
+    notes: "",
+  });
   const [profileForm, setProfileForm] = useState({
     firstName: "",
     lastName: "",
@@ -58,6 +70,14 @@ function DentistDashboard() {
     const month = String(value.getMonth() + 1).padStart(2, "0");
     const day = String(value.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  };
+
+  const getWeekStart = (value: Date) => {
+    const start = new Date(value);
+    start.setHours(0, 0, 0, 0);
+    const mondayOffset = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - mondayOffset);
+    return start;
   };
 
   useEffect(() => {
@@ -123,6 +143,23 @@ function DentistDashboard() {
 
     loadData();
   }, [dentist]);
+
+  useEffect(() => {
+    if (calendarWeekInitialized || appointments.length === 0) return;
+
+    const sortedByStart = [...appointments].sort((a, b) => {
+      const aTime = new Date(a.start_Time ?? a.Start_Time).getTime();
+      const bTime = new Date(b.start_Time ?? b.Start_Time).getTime();
+      return aTime - bTime;
+    });
+
+    const latest = sortedByStart[sortedByStart.length - 1];
+    const latestStart = latest?.start_Time ?? latest?.Start_Time;
+    if (!latestStart) return;
+
+    setCurrentWeekStart(getWeekStart(new Date(latestStart)));
+    setCalendarWeekInitialized(true);
+  }, [appointments, calendarWeekInitialized]);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
@@ -284,6 +321,120 @@ function DentistDashboard() {
     setMoveReason("");
   };
 
+  const openAppointmentDetails = (appointment: any) => {
+    const fullName = appointment.customer_Full_Name ?? appointment.Customer_Full_Name ?? "";
+    const phone = appointment.customer_Phone_Number ?? appointment.Customer_Phone_Number;
+    const email = appointment.customer_Email_Address ?? appointment.Customer_Email_Address ?? "";
+    const notes = appointment.notes ?? appointment.Notes ?? "";
+
+    setSelectedAppointment(appointment);
+    setAppointmentForm({
+      customerFullName: fullName,
+      customerPhoneNumber: phone == null ? "" : String(phone),
+      customerEmailAddress: email,
+      notes,
+    });
+    setEditableAppointmentFields({});
+    setAppointmentMessage("");
+  };
+
+  const closeAppointmentDetails = () => {
+    setSelectedAppointment(null);
+    setEditableAppointmentFields({});
+    setAppointmentMessage("");
+  };
+
+  const handleAppointmentOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      closeAppointmentDetails();
+    }
+  };
+
+  const toggleAppointmentFieldEdit = (field: string) => {
+    setEditableAppointmentFields((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleAppointmentFieldChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+    setAppointmentForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const saveAppointmentChanges = async (markAsCompleted: boolean) => {
+    if (!selectedAppointment || !dentist) return;
+
+    const appointmentId = selectedAppointment.id ?? selectedAppointment.ID;
+    if (!appointmentId) {
+      setAppointmentMessage("Unable to determine appointment ID.");
+      return;
+    }
+
+    const originalFullName = selectedAppointment.customer_Full_Name ?? selectedAppointment.Customer_Full_Name ?? "";
+    const originalPhone = selectedAppointment.customer_Phone_Number ?? selectedAppointment.Customer_Phone_Number;
+    const originalEmail = selectedAppointment.customer_Email_Address ?? selectedAppointment.Customer_Email_Address ?? "";
+    const originalNotes = selectedAppointment.notes ?? selectedAppointment.Notes ?? "";
+    const originalCompleted = Boolean(selectedAppointment.completed ?? selectedAppointment.Completed);
+
+    const payload: any = {};
+    if (appointmentForm.customerFullName !== originalFullName) {
+      payload.Customer_Full_Name = appointmentForm.customerFullName;
+    }
+
+    const nextPhone = appointmentForm.customerPhoneNumber.trim() === "" ? 0 : Number(appointmentForm.customerPhoneNumber);
+    if (!Number.isNaN(nextPhone) && nextPhone !== Number(originalPhone ?? 0)) {
+      payload.Customer_Phone_Number = nextPhone;
+    }
+
+    if (appointmentForm.customerEmailAddress !== originalEmail) {
+      payload.Customer_Email_Address = appointmentForm.customerEmailAddress;
+    }
+
+    if (appointmentForm.notes !== originalNotes) {
+      payload.Notes = appointmentForm.notes;
+    }
+
+    if (markAsCompleted && !originalCompleted) {
+      payload.Completed = true;
+    }
+
+    if (!markAsCompleted && Object.keys(payload).length === 0) {
+      setAppointmentMessage("No changes to save.");
+      return;
+    }
+
+    setSavingAppointment(true);
+    setAppointmentMessage("");
+
+    try {
+      const updated = await UpdateAppointment(appointmentId, payload);
+      const merged = {
+        ...selectedAppointment,
+        ...updated,
+        ID: updated.ID ?? updated.id ?? appointmentId,
+        Customer_Full_Name: updated.Customer_Full_Name ?? updated.customer_Full_Name ?? appointmentForm.customerFullName,
+        Customer_Phone_Number: updated.Customer_Phone_Number ?? updated.customer_Phone_Number ?? nextPhone,
+        Customer_Email_Address: updated.Customer_Email_Address ?? updated.customer_Email_Address ?? appointmentForm.customerEmailAddress,
+        Completed: updated.Completed ?? updated.completed ?? (markAsCompleted ? true : originalCompleted),
+        Notes: updated.Notes ?? updated.notes ?? appointmentForm.notes,
+      };
+
+      setSelectedAppointment(merged);
+      setAppointments((prev) =>
+        prev.map((appt) => {
+          const id = appt.id ?? appt.ID;
+          return id === appointmentId ? { ...appt, ...merged } : appt;
+        })
+      );
+
+      setStatusMessage(markAsCompleted ? "Appointment marked as completed." : "Appointment updated.");
+      closeAppointmentDetails();
+    } catch (error) {
+      console.error("Failed to update appointment", error);
+      setAppointmentMessage("Unable to save appointment changes.");
+    } finally {
+      setSavingAppointment(false);
+    }
+  };
+
   const confirmMoveQuery = async () => {
     if (moveQueryId == null) return;
 
@@ -410,6 +561,145 @@ function DentistDashboard() {
             </div>
           </div>
         )}
+        {selectedAppointment && (
+          <div className="modal-overlay" onClick={handleAppointmentOverlayClick}>
+            <div className="modal-card" onClick={(event) => event.stopPropagation()}>
+              <h2>Appointment details</h2>
+              <div className="appointment-detail-grid">
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-name">Patient</label>
+                  <div className="appointment-field-input-wrap">
+                    <input
+                      id="appointment-name"
+                      name="customerFullName"
+                      className="form-input"
+                      value={appointmentForm.customerFullName}
+                      onChange={handleAppointmentFieldChange}
+                      readOnly={!editableAppointmentFields.customerFullName}
+                    />
+                    <button type="button" className="icon-button" onClick={() => toggleAppointmentFieldEdit("customerFullName")}>Edit</button>
+                  </div>
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-start">Start</label>
+                  <input
+                    id="appointment-start"
+                    className="form-input"
+                    value={(() => {
+                      const value = selectedAppointment.start_Time ?? selectedAppointment.Start_Time;
+                      return value ? new Date(value).toLocaleString() : "N/A";
+                    })()}
+                    readOnly
+                  />
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-duration">Duration</label>
+                  <input
+                    id="appointment-duration"
+                    className="form-input"
+                    value={`${selectedAppointment.duration_mins ?? selectedAppointment.Duration_mins ?? "N/A"} mins`}
+                    readOnly
+                  />
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-dob">DOB</label>
+                  <input
+                    id="appointment-dob"
+                    className="form-input"
+                    value={selectedAppointment.customer_Date_Of_Birth ?? selectedAppointment.Customer_Date_Of_Birth ?? "N/A"}
+                    readOnly
+                  />
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-phone">Phone</label>
+                  <div className="appointment-field-input-wrap">
+                    <input
+                      id="appointment-phone"
+                      name="customerPhoneNumber"
+                      className="form-input"
+                      value={appointmentForm.customerPhoneNumber}
+                      onChange={handleAppointmentFieldChange}
+                      readOnly={!editableAppointmentFields.customerPhoneNumber}
+                    />
+                    <button type="button" className="icon-button" onClick={() => toggleAppointmentFieldEdit("customerPhoneNumber")}>Edit</button>
+                  </div>
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-email">Email</label>
+                  <div className="appointment-field-input-wrap">
+                    <input
+                      id="appointment-email"
+                      name="customerEmailAddress"
+                      className="form-input"
+                      value={appointmentForm.customerEmailAddress}
+                      onChange={handleAppointmentFieldChange}
+                      readOnly={!editableAppointmentFields.customerEmailAddress}
+                    />
+                    <button type="button" className="icon-button" onClick={() => toggleAppointmentFieldEdit("customerEmailAddress")}>Edit</button>
+                  </div>
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-procedure">Procedure</label>
+                  <input
+                    id="appointment-procedure"
+                    className="form-input"
+                    value={selectedAppointment.procedure_Name ?? selectedAppointment.Procedure_Name ?? "Procedure not set"}
+                    readOnly
+                  />
+                </div>
+                <div className="appointment-field">
+                  <label className="form-label" htmlFor="appointment-status">Status</label>
+                  <input
+                    id="appointment-status"
+                    className="form-input"
+                    value={(selectedAppointment.completed ?? selectedAppointment.Completed) ? "Completed" : "Pending"}
+                    readOnly
+                  />
+                </div>
+                <div className="appointment-field appointment-field-full">
+                  <label className="form-label" htmlFor="appointment-notes">Notes</label>
+                  <div className="appointment-field-input-wrap">
+                    <textarea
+                      id="appointment-notes"
+                      name="notes"
+                      className="form-textarea appointment-notes"
+                      value={appointmentForm.notes}
+                      onChange={handleAppointmentFieldChange}
+                      readOnly={!editableAppointmentFields.notes}
+                    />
+                    <button type="button" className="icon-button" onClick={() => toggleAppointmentFieldEdit("notes")}>Edit</button>
+                  </div>
+                </div>
+                {appointmentMessage && <p className="form-note">{appointmentMessage}</p>}
+              </div>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => saveAppointmentChanges(false)}
+                  disabled={savingAppointment}
+                >
+                  Save changes
+                </button>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => saveAppointmentChanges(true)}
+                  disabled={savingAppointment || Boolean(selectedAppointment.completed ?? selectedAppointment.Completed)}
+                >
+                  Complete appointment
+                </button>
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  onClick={closeAppointmentDetails}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeTab === "queries" ? (
           <div className="query-list">
@@ -525,8 +815,17 @@ function DentistDashboard() {
                           const start = new Date(appt.start_Time ?? appt.Start_Time);
                           const procedureName = appt.procedure_Name ?? appt.Procedure_Name ?? "Procedure not set";
                           const doctorName = `${dentist.First_Name} ${dentist.Last_Name}`.trim();
+                          const phoneNumber = appt.customer_Phone_Number ?? appt.Customer_Phone_Number;
+                          const emailAddress = appt.customer_Email_Address ?? appt.Customer_Email_Address;
+                          const notes = appt.notes ?? appt.Notes;
+                          const completed = appt.completed ?? appt.Completed;
                           return (
-                            <div key={`${key}-${idx}`} className="calendar-appointment-item">
+                            <button
+                              type="button"
+                              key={`${key}-${idx}`}
+                              className="calendar-appointment-item calendar-appointment-button"
+                              onClick={() => openAppointmentDetails(appt)}
+                            >
                               <strong>{appt.customer_Full_Name ?? appt.Customer_Full_Name ?? "Patient"}</strong>
                               <span>
                                 {start.toLocaleTimeString([], {
@@ -536,7 +835,11 @@ function DentistDashboard() {
                               </span>
                               <span><strong>Doctor:</strong> {doctorName}</span>
                               <span>{procedureName}</span>
-                            </div>
+                              <span><strong>Phone:</strong> {phoneNumber || "N/A"}</span>
+                              <span><strong>Email:</strong> {emailAddress || "N/A"}</span>
+                              <span><strong>Status:</strong> {completed ? "Completed" : "Pending"}</span>
+                              <span><strong>Notes:</strong> {notes || "None"}</span>
+                            </button>
                           );
                         })
                       )}

@@ -23,11 +23,17 @@ namespace AppointmentBooking.Models
         
         [Required]
         public DateOnly Customer_Date_Of_Birth {get;set;} = DateOnly.FromDateTime(DateTime.MinValue);
+        
+        [Required]
+        public int Customer_Phone_Number {get;set;} = 0;
 
+        public string? Customer_Email_Address {get;set;}
 
-        // [Required, EmailAddress]
-        //public string CustomerEmail { get; set; } = null!;
-        // appointment start time (UTC recommended)
+        [Required]
+        public bool Completed {get;set;} = false;
+
+        public string? Notes {get;set;}
+
 
     }
 }
