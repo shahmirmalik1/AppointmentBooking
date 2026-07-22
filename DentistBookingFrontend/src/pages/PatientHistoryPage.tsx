@@ -6,6 +6,7 @@ function PatientHistoryPage() {
   const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   const [patientHistory, setPatientHistory] = useState<any | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [nameFilter, setNameFilter] = useState("");
   const [dobFilter, setDobFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,6 +27,7 @@ function PatientHistoryPage() {
 
   const handleSelectPatient = async (patient: any) => {
     setSelectedPatient(patient);
+    setIsHistoryModalOpen(true);
     setLoadingDetails(true);
     try {
       const fullName = patient.customer_Full_Name ?? patient.Customer_Full_Name;
@@ -38,6 +40,12 @@ function PatientHistoryPage() {
     } finally {
       setLoadingDetails(false);
     }
+  };
+
+  const closeHistoryModal = () => {
+    setIsHistoryModalOpen(false);
+    setSelectedPatient(null);
+    setPatientHistory(null);
   };
 
   const filteredPatients = useMemo(() => {
@@ -75,6 +83,23 @@ function PatientHistoryPage() {
     }
   }, [currentPage, totalPages]);
 
+  useEffect(() => {
+    if (!isHistoryModalOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeHistoryModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isHistoryModalOpen]);
+
   return (
     <div className="page-layout">
       <div className="form-card booking-form patient-history-shell">
@@ -86,90 +111,101 @@ function PatientHistoryPage() {
           </p>
         </div>
 
-        <div className="patient-history-grid">
-          <div className="patient-list-panel">
-            <h2 className="section-title">Patients</h2>
-            <div className="patient-filter-row">
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Search by patient name"
-                value={nameFilter}
-                onChange={(event) => setNameFilter(event.target.value)}
-              />
-              <input
-                type="date"
-                className="form-input"
-                value={dobFilter}
-                onChange={(event) => setDobFilter(event.target.value)}
-              />
-              <button
-                type="button"
-                className="button button-secondary patient-clear-filters"
-                onClick={clearFilters}
-                disabled={!nameFilter && !dobFilter}
-              >
-                Clear Filters
-              </button>
-            </div>
-            <div className="list-grid">
-              {pagedPatients.map((patient, index) => {
-                const fullName = patient.customer_Full_Name ?? patient.Customer_Full_Name;
-                const dateOfBirth = patient.customer_Date_Of_Birth ?? patient.Customer_Date_Of_Birth;
-                const count = patient.appointment_Count ?? patient.Appointment_Count ?? 0;
-                const isSelected =
-                  selectedPatient &&
-                  (selectedPatient.customer_Full_Name ?? selectedPatient.Customer_Full_Name) === fullName &&
-                  (selectedPatient.customer_Date_Of_Birth ?? selectedPatient.Customer_Date_Of_Birth) === dateOfBirth;
-
-                return (
-                  <button
-                    key={`${fullName}-${dateOfBirth}-${index}`}
-                    type="button"
-                    className={`list-row patient-list-item ${isSelected ? "active" : ""}`}
-                    onClick={() => handleSelectPatient(patient)}
-                  >
-                    <strong>{fullName}</strong>
-                    <p>DOB: {dateOfBirth}</p>
-                    <p>Appointments: {count}</p>
-                  </button>
-                );
-              })}
-              {filteredPatients.length === 0 && (
-                <p className="form-note">No patients match the current filters.</p>
-              )}
-            </div>
-            <div className="patient-pagination">
-              <button
-                type="button"
-                className="button button-secondary"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span>Page {currentPage} of {totalPages}</span>
-              <button
-                type="button"
-                className="button button-secondary"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
+        <div className="patient-list-panel">
+          <h2 className="section-title">Patients</h2>
+          <div className="patient-filter-row">
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Search by patient name"
+              value={nameFilter}
+              onChange={(event) => setNameFilter(event.target.value)}
+            />
+            <input
+              type="date"
+              className="form-input"
+              value={dobFilter}
+              onChange={(event) => setDobFilter(event.target.value)}
+            />
+            <button
+              type="button"
+              className="button button-secondary patient-clear-filters"
+              onClick={clearFilters}
+              disabled={!nameFilter && !dobFilter}
+            >
+              Clear Filters
+            </button>
           </div>
+          <div className="list-grid">
+            {pagedPatients.map((patient, index) => {
+              const fullName = patient.customer_Full_Name ?? patient.Customer_Full_Name;
+              const dateOfBirth = patient.customer_Date_Of_Birth ?? patient.Customer_Date_Of_Birth;
+              const count = patient.appointment_Count ?? patient.Appointment_Count ?? 0;
 
-          <div className="patient-details-panel">
-            <h2 className="section-title">History details</h2>
-            {!selectedPatient ? (
-              <p className="form-note">Select a patient to view complete appointment history.</p>
-            ) : loadingDetails ? (
+              return (
+                <button
+                  key={`${fullName}-${dateOfBirth}-${index}`}
+                  type="button"
+                  className="list-row patient-list-item"
+                  onClick={() => handleSelectPatient(patient)}
+                >
+                  <strong>{fullName}</strong>
+                  <p>DOB: {dateOfBirth}</p>
+                  <p>Appointments: {count}</p>
+                </button>
+              );
+            })}
+            {filteredPatients.length === 0 && (
+              <p className="form-note">No patients match the current filters.</p>
+            )}
+          </div>
+          <div className="patient-pagination">
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isHistoryModalOpen && selectedPatient && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" onClick={closeHistoryModal}>
+          <div className="modal-card patient-history-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="patient-history-modal-header">
+              <div>
+                <h2>{selectedPatient.customer_Full_Name ?? selectedPatient.Customer_Full_Name}</h2>
+                <p>
+                  DOB: {selectedPatient.customer_Date_Of_Birth ?? selectedPatient.Customer_Date_Of_Birth}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="button button-secondary patient-history-modal-close"
+                onClick={closeHistoryModal}
+              >
+                Close
+              </button>
+            </div>
+
+            {loadingDetails ? (
               <p className="form-note">Loading history...</p>
             ) : !patientHistory || !(patientHistory.appointments ?? patientHistory.Appointments)?.length ? (
               <p className="form-note">No appointments found for this patient.</p>
             ) : (
-              <div className="list-grid">
+              <div className="list-grid patient-history-modal-list">
                 {(patientHistory.appointments ?? patientHistory.Appointments).map((appointment: any) => {
                   const startTime = appointment.start_Time ?? appointment.Start_Time;
                   const duration = appointment.duration_mins ?? appointment.Duration_mins;
@@ -197,7 +233,7 @@ function PatientHistoryPage() {
             )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

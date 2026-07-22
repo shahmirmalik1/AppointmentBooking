@@ -834,17 +834,10 @@ select:focus {
 }
 
 .patient-history-shell {
-  max-width: 1200px;
+  max-width: 980px;
 }
 
-.patient-history-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 18px;
-}
-
-.patient-list-panel,
-.patient-details-panel {
+.patient-list-panel {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 16px;
@@ -864,14 +857,44 @@ select:focus {
 
 .patient-filter-row {
   display: grid;
-  grid-template-columns: 1fr 180px auto;
+  grid-template-columns: minmax(220px, 1fr) minmax(170px, 220px) auto;
   gap: 10px;
   margin-bottom: 12px;
+  align-items: center;
 }
 
 .patient-clear-filters {
   padding: 12px 16px;
   white-space: nowrap;
+}
+
+.patient-history-modal {
+  width: min(900px, 100%);
+  max-height: min(78vh, 860px);
+  overflow: hidden;
+  display: grid;
+  gap: 14px;
+}
+
+.patient-history-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.patient-history-modal-header p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.patient-history-modal-close {
+  padding: 10px 16px;
+}
+
+.patient-history-modal-list {
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .patient-pagination {
@@ -904,12 +927,21 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
-  .patient-history-grid {
+  .patient-filter-row {
     grid-template-columns: 1fr;
   }
 
-  .patient-filter-row {
-    grid-template-columns: 1fr;
+  .patient-history-modal {
+    max-height: min(84vh, 860px);
+  }
+
+  .patient-history-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patient-history-modal-close {
+    width: 100%;
   }
 
   .query-filters {
