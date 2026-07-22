@@ -112,6 +112,55 @@ button {
   color: var(--text);
 }
 
+.nav-group {
+  position: relative;
+}
+
+.nav-group-title {
+  list-style: none;
+  cursor: pointer;
+}
+
+.nav-group-title::-webkit-details-marker {
+  display: none;
+}
+
+.nav-group-title::after {
+  content: "▾";
+  margin-left: 8px;
+  font-size: 0.75rem;
+}
+
+.nav-group[open] .nav-group-title::after {
+  content: "▴";
+}
+
+.nav-group-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 220px;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.nav-group-link {
+  display: block;
+  color: var(--text);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.nav-group-link:hover {
+  background: #f3f4f6;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -558,6 +607,23 @@ select:focus {
   gap: 20px;
 }
 
+.list-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.list-row {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px 16px;
+}
+
+.list-row p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
 .query-card {
   border: 1px solid #e5e7eb;
   border-radius: 20px;
@@ -595,8 +661,9 @@ select:focus {
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
   margin-top: 18px;
+  max-width: 100%;
 }
 
 .query-actions .button {
@@ -605,13 +672,13 @@ select:focus {
 }
 
 .query-status-select {
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
+  width: clamp(150px, 34vw, 260px);
+  min-width: 150px;
+  max-width: 100%;
   font-size: 1rem;
   padding-top: 13px;
   padding-bottom: 13px;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
 }
 
 .query-sections {
@@ -731,19 +798,28 @@ select:focus {
     align-items: flex-start;
   }
 
+  .nav-group {
+    width: 100%;
+  }
+
+  .nav-group-menu {
+    position: static;
+    margin-top: 8px;
+    min-width: 0;
+  }
+
   .calendar-week-grid {
     grid-template-columns: 1fr;
   }
 
   .query-actions {
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
   }
 
   .query-status-select {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
+    width: clamp(140px, 50vw, 220px);
+    min-width: 140px;
   }
 }
 

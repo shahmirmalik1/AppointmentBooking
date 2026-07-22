@@ -11,7 +11,7 @@ import AddDoctor from "./pages/AddDoctorPage";
 import AddProcedure from "./pages/AddProcedurePage";
 import CreateAccount from "./pages/CreateAccountPage";
 import AllDoctors from "./pages/AllDoctorsPage";
-import AllAppointments from "./pages/AllAppointmentsPage";
+import AllProcedures from "./pages/AllProceduresPage";
 import AllQueriesPage from "./pages/AllQueriesPage";
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
             <Route path="/add-procedure" element={<AddProcedure />} />
             <Route path="/create-account" element={<CreateAccount />} />
             <Route path="/doctors" element={<AllDoctors />} />
-            <Route path="/appointments" element={<AllAppointments />} />
+            <Route path="/procedures" element={<AllProcedures />} />
             <Route path="/all-queries" element={<AllQueriesPage />} />
           </Routes>
         </main>

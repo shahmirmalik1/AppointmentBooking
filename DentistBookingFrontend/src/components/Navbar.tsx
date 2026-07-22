@@ -78,11 +78,22 @@ function Navbar() {
         ) : null}
         {dentist ? (
           <>
-            <Link to="/add-doctor" className="nav-link">Add Doctor</Link>
-            <Link to="/add-procedure" className="nav-link">Add Procedure</Link>
-            <Link to="/create-account" className="nav-link">Create Account</Link>
-            <Link to="/doctors" className="nav-link">All Doctors</Link>
-            <Link to="/appointments" className="nav-link">All Appointments</Link>
+            <details className="nav-group">
+              <summary className="nav-link nav-group-title">Setup</summary>
+              <div className="nav-group-menu">
+                <Link to="/add-doctor" className="nav-group-link">Add Doctor</Link>
+                <Link to="/add-procedure" className="nav-group-link">Add Procedure</Link>
+                <Link to="/create-account" className="nav-group-link">Create Dentist Account</Link>
+              </div>
+            </details>
+            <details className="nav-group">
+              <summary className="nav-link nav-group-title">View</summary>
+              <div className="nav-group-menu">
+                <Link to="/doctors" className="nav-group-link">All Doctors</Link>
+                <Link to="/procedures" className="nav-group-link">All Procedures</Link>
+                <Link to="/all-queries" className="nav-group-link">All Queries</Link>
+              </div>
+            </details>
           </>
         ) : null}
       </div>
