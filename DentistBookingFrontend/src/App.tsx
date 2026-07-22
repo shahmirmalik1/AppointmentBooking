@@ -13,6 +13,7 @@ import CreateAccount from "./pages/CreateAccountPage";
 import AllDoctors from "./pages/AllDoctorsPage";
 import AllProcedures from "./pages/AllProceduresPage";
 import AllQueriesPage from "./pages/AllQueriesPage";
+import PatientHistoryPage from "./pages/PatientHistoryPage";
 function App() {
   return (
     <BrowserRouter>
@@ -32,6 +33,7 @@ function App() {
             <Route path="/doctors" element={<AllDoctors />} />
             <Route path="/procedures" element={<AllProcedures />} />
             <Route path="/all-queries" element={<AllQueriesPage />} />
+            <Route path="/patient-history" element={<PatientHistoryPage />} />
           </Routes>
         </main>
       </div>

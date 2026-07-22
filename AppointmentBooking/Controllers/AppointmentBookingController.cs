@@ -525,6 +525,108 @@ namespace AppointmentBooking.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetPatientHistory")]
+        public async Task<IActionResult> GetPatientHistory()
+        {
+            var summaries = await _db.Appointments
+                .Where(a => !string.IsNullOrWhiteSpace(a.Customer_Full_Name))
+                .Select(a => new
+                {
+                    Name = (a.Customer_Full_Name ?? string.Empty).Trim(),
+                    NameKey = (a.Customer_Full_Name ?? string.Empty).Trim().ToLower(),
+                    a.Customer_Date_Of_Birth,
+                    a.Start_Time,
+                })
+                .GroupBy(a => new { a.NameKey, a.Customer_Date_Of_Birth })
+                .Select(g => new PatientHistorySummaryResponse
+                {
+                    Customer_Full_Name = g.Select(x => x.Name).FirstOrDefault() ?? string.Empty,
+                    Customer_Date_Of_Birth = g.Key.Customer_Date_Of_Birth,
+                    Appointment_Count = g.Count(),
+                    Last_Appointment_Time = g.Max(x => x.Start_Time),
+                })
+                .OrderBy(x => x.Customer_Full_Name)
+                .ThenBy(x => x.Customer_Date_Of_Birth)
+                .ToListAsync();
+
+            return Ok(summaries);
+        }
+
+        [HttpGet("GetPatientHistoryDetails")]
+        public async Task<IActionResult> GetPatientHistoryDetails([FromQuery] string fullName, [FromQuery] DateOnly dateOfBirth)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                return BadRequest("fullName is required.");
+            }
+
+            var normalizedName = fullName.Trim().ToLower();
+
+            var appointments = await _db.Appointments
+                .Where(a => a.Customer_Date_Of_Birth == dateOfBirth
+                    && (a.Customer_Full_Name ?? string.Empty).Trim().ToLower() == normalizedName)
+                .OrderByDescending(a => a.Start_Time)
+                .ToListAsync();
+
+            var doctorIds = appointments.Select(a => a.Dentist_ID).Distinct().ToList();
+            var doctors = await _db.Doctors
+                .Where(d => doctorIds.Contains(d.ID))
+                .ToDictionaryAsync(
+                    d => d.ID,
+                    d => $"{d.First_Name ?? string.Empty} {d.Last_Name ?? string.Empty}".Trim());
+
+            var appointmentTimes = appointments.Select(a => a.Start_Time).Distinct().ToList();
+            var patientQueries = await _db.CustomerQuery
+                .Where(q => q.Date_Of_Birth == dateOfBirth
+                    && (((q.First_Name ?? string.Empty) + " " + (q.Surname ?? string.Empty)).Trim().ToLower()) == normalizedName
+                    && q.Date_Time.HasValue
+                    && appointmentTimes.Contains(q.Date_Time.Value))
+                .ToListAsync();
+
+            var procedureIds = patientQueries
+                .Where(q => q.Procedure_ID.HasValue)
+                .Select(q => q.Procedure_ID!.Value)
+                .Distinct()
+                .ToList();
+
+            var procedures = await _db.Procedures
+                .Where(p => procedureIds.Contains(p.ID))
+                .ToDictionaryAsync(p => p.ID, p => p.Procedure_Name ?? string.Empty);
+
+            var appointmentRows = appointments.Select(a =>
+            {
+                var matchedQuery = patientQueries.FirstOrDefault(q => q.Date_Time.HasValue && q.Date_Time.Value == a.Start_Time);
+                string? procedureName = null;
+                if (matchedQuery?.Procedure_ID is int procedureId && procedures.TryGetValue(procedureId, out var value))
+                {
+                    procedureName = value;
+                }
+
+                return new PatientHistoryAppointmentResponse
+                {
+                    ID = a.ID,
+                    Start_Time = a.Start_Time,
+                    Duration_mins = a.Duration_mins,
+                    Dentist_ID = a.Dentist_ID,
+                    Dentist_Full_Name = doctors.TryGetValue(a.Dentist_ID, out var doctorName) ? doctorName : $"Doctor #{a.Dentist_ID}",
+                    Customer_Phone_Number = a.Customer_Phone_Number,
+                    Customer_Email_Address = a.Customer_Email_Address ?? string.Empty,
+                    Completed = a.Completed,
+                    Notes = a.Notes ?? string.Empty,
+                    Procedure_Name = procedureName,
+                };
+            }).ToList();
+
+            var response = new PatientHistoryDetailsResponse
+            {
+                Customer_Full_Name = appointments.FirstOrDefault()?.Customer_Full_Name ?? fullName.Trim(),
+                Customer_Date_Of_Birth = dateOfBirth,
+                Appointments = appointmentRows,
+            };
+
+            return Ok(response);
+        }
+
         [HttpPut("ConfirmDoctorQuery/{queryID:int}")]
         public async Task<IActionResult> ConfirmDoctorQuery(int queryID)
         {
@@ -787,6 +889,35 @@ namespace AppointmentBooking.Controllers
         public int Duration_mins { get; set; }
         public string Customer_Full_Name { get; set; } = string.Empty;
         public DateOnly Customer_Date_Of_Birth { get; set; }
+        public int Customer_Phone_Number { get; set; }
+        public string Customer_Email_Address { get; set; } = string.Empty;
+        public bool Completed { get; set; }
+        public string Notes { get; set; } = string.Empty;
+        public string? Procedure_Name { get; set; }
+    }
+
+    public class PatientHistorySummaryResponse
+    {
+        public string Customer_Full_Name { get; set; } = string.Empty;
+        public DateOnly Customer_Date_Of_Birth { get; set; }
+        public int Appointment_Count { get; set; }
+        public DateTime Last_Appointment_Time { get; set; }
+    }
+
+    public class PatientHistoryDetailsResponse
+    {
+        public string Customer_Full_Name { get; set; } = string.Empty;
+        public DateOnly Customer_Date_Of_Birth { get; set; }
+        public List<PatientHistoryAppointmentResponse> Appointments { get; set; } = new();
+    }
+
+    public class PatientHistoryAppointmentResponse
+    {
+        public int ID { get; set; }
+        public DateTime Start_Time { get; set; }
+        public int Duration_mins { get; set; }
+        public int Dentist_ID { get; set; }
+        public string Dentist_Full_Name { get; set; } = string.Empty;
         public int Customer_Phone_Number { get; set; }
         public string Customer_Email_Address { get; set; } = string.Empty;
         public bool Completed { get; set; }

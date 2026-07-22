@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj": {}
+    "c:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj": {
+    "c:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj",
+        "projectUniqueName": "c:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj",
         "projectName": "AppointmentBooking",
-        "projectPath": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj",
+        "projectPath": "c:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\AppointmentBooking.csproj",
         "packagesPath": "C:\\Users\\Shahmir\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\obj\\",
+        "outputPath": "c:\\Users\\Shahmir\\source\\repos\\AppointmentBooking\\AppointmentBooking\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

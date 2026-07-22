@@ -92,6 +92,7 @@ function Navbar() {
                 <Link to="/doctors" className="nav-group-link">All Doctors</Link>
                 <Link to="/procedures" className="nav-group-link">All Procedures</Link>
                 <Link to="/all-queries" className="nav-group-link">All Queries</Link>
+                <Link to="/patient-history" className="nav-group-link">Patient History</Link>
               </div>
             </details>
           </>

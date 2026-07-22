@@ -147,3 +147,18 @@ export const GetDoctorFreeTimes = async (
 
   return response.data;
 };
+
+export const GetPatientHistory = async () => {
+  const response = await axios.get(`${API_BASE}/GetPatientHistory`);
+  return response.data;
+};
+
+export const GetPatientHistoryDetails = async (fullName: string, dateOfBirth: string) => {
+  const response = await axios.get(`${API_BASE}/GetPatientHistoryDetails`, {
+    params: {
+      fullName,
+      dateOfBirth,
+    },
+  });
+  return response.data;
+};

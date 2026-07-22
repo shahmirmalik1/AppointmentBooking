@@ -833,6 +833,64 @@ select:focus {
   max-width: 1280px;
 }
 
+.patient-history-shell {
+  max-width: 1200px;
+}
+
+.patient-history-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+}
+
+.patient-list-panel,
+.patient-details-panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.patient-list-item {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.patient-list-item.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.patient-filter-row {
+  display: grid;
+  grid-template-columns: 1fr 180px auto;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.patient-clear-filters {
+  padding: 12px 16px;
+  white-space: nowrap;
+}
+
+.patient-pagination {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.patient-pagination span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.patient-history-row p {
+  margin-top: 6px;
+}
+
 .contact-card {
   width: 100%;
   max-width: 760px;
@@ -843,6 +901,14 @@ select:focus {
 
 @media (max-width: 860px) {
   .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-history-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-filter-row {
     grid-template-columns: 1fr;
   }
 
